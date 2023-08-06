@@ -1,0 +1,8 @@
+setup.py
+mygrader/__init__.py
+mygrader/printer.py
+mygrader/writer.py
+mygrader.egg-info/PKG-INFO
+mygrader.egg-info/SOURCES.txt
+mygrader.egg-info/dependency_links.txt
+mygrader.egg-info/top_level.txt

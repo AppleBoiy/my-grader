@@ -10,24 +10,24 @@ This Python script provides functions to display test results and record failed 
 
 ```python
     # Import the functions
-    from mygrader import print_test_results, write_failed_cases_to_file
-    
-    # Example usage
-    # Assuming you have a list of failed test cases named 'failed_cases'
-    num_passed = 90
-    num_failed = 10
-    failed_cases = [
-        ("input_1", "expected_1", "got_1"),
-        ("input_2", "expected_2", "got_2"),
-        ("input_3", "expected_3", "got_3"),
-        ("input_4", "expected_4", "got_4"),
-        ("input_5", "expected_5", "got_5"),
-    ]
-    
-    # Call the function to print the results and write failed cases to a file
-    print_test_results(num_passed, num_failed, failed_cases)
+from src.mygrader import print_test_results, write_failed_cases_to_file
 
-    write_failed_cases_to_file(failed_cases, "custom_failed_cases.txt")
+# Example usage
+# Assuming you have a list of failed test cases named 'failed_cases'
+num_passed = 90
+num_failed = 10
+failed_cases = [
+    ("input_1", "expected_1", "got_1"),
+    ("input_2", "expected_2", "got_2"),
+    ("input_3", "expected_3", "got_3"),
+    ("input_4", "expected_4", "got_4"),
+    ("input_5", "expected_5", "got_5"),
+]
+
+# Call the function to print the results and write failed cases to a file
+print_test_results(num_passed, num_failed, failed_cases)
+
+write_failed_cases_to_file(failed_cases, "custom_failed_cases.txt")
 
 ```
 

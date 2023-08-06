@@ -8,5 +8,28 @@ setup(
     author='AppleBoiy',
     author_email='contact.chaipat@gmail.com',
     description='my own CS111 grader.',
-    url='https://github.com',
+
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+    ],
+    entry_points={
+        'console_scripts': [
+            'your_script=your_package:main',
+        ],
+    },
+    extras_require={
+        'test': [
+            'pytest',
+            'coverage',
+            'pytest-cov'
+        ],
+    },
+)
 )

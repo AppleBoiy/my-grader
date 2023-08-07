@@ -13,12 +13,17 @@ def print_test_results(num_passed, num_failed, failed_cases):
 
     """
     print(f"{num_passed} test cases passed.")
+
+
     if num_failed > 0:
         print(f"{num_failed} test cases failed.")
-        if num_failed > 10:
-            print("Failed cases:")
-            for i, failed_case in enumerate(failed_cases, start=1):
-                print(f"{i}. Input: {failed_case[0]}, Expected: {failed_case[1]}, Got: {failed_case[2]}")
+
+        for i, failed_case in enumerate(failed_cases, start=1):
+            if i > 10:
+                break
+
+            print(f"{i}. Input: {failed_case[0]}, Expected: {failed_case[1]}, Got: {failed_case[2]}")
+
     else:
         print("All test cases passed successfully.")
 

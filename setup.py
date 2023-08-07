@@ -1,14 +1,18 @@
 from setuptools import setup, find_packages
 
+# read the contents of your README file
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name='mygrader',
-    version='0.1.2',
+    version='0.1.4',
     packages=find_packages(),
     install_requires=[],  # Add any required dependencies here
     author='AppleBoiy',
     author_email='contact.chaipat@gmail.com',
     description='my own CS111 grader.',
-
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -16,8 +20,6 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
     ],
     entry_points={
         'console_scripts': [

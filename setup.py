@@ -11,8 +11,14 @@ setup(
     packages=find_packages(),
     install_requires=[],  # Add any required dependencies here
     author='AppleBoiy',
+
     author_email='contact.chaipat@gmail.com',
     description='my own CS111 grader.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+
+    url="https://github.com/AppleBoiy/my-grader",
+
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

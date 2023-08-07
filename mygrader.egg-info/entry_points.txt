@@ -1,2 +1,0 @@
-[console_scripts]
-your_script = your_package:main

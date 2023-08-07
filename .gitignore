@@ -1,0 +1,38 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Compiled C extensions
+*.so
+
+# macOS specific files
+.DS_Store
+
+# PyCharm settings
+.idea/
+
+# PyCharm virtual environment
+.venv/
+
+# Compiled Python files
+*.pyc
+
+# Compiled Python files using Cython
+*.pyx
+
+# Compiled Python files using Nuitka
+*.pyo
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Sphinx documentation
+docs/_build/
+
+# Test reports
+htmlcov/
+.coverage
+.tox/

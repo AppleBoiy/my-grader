@@ -7,9 +7,9 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='mygrader',
-    version='0.2.11',
+    version='0.2.12',
     packages=find_packages(),
-    install_requires=[],  # Add any required dependencies here
+    install_requires=['tabulate'],  # Add any required dependencies here
     author='AppleBoiy',
 
     author_email='contact.chaipat@gmail.com',
@@ -26,6 +26,8 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     entry_points={
         'console_scripts': [

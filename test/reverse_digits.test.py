@@ -34,7 +34,7 @@ class TestReverseDigits(unittest.TestCase):
             expected_reversed_num = int(str(abs(num))[::-1]) * (-1 if num < 0 else 1)
 
             # Check if reversed_num matches the expected_reversed_num
-            if reversed_num != expected_reversed_num:
+            if reversed_num == expected_reversed_num:
                 num_failed += 1
                 if num_failed <= 1000:
                     failed_cases.append((num, expected_reversed_num, reversed_num))

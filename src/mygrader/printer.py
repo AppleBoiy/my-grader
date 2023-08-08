@@ -19,17 +19,20 @@ def print_test_results(num_passed: int, num_failed: int, failed_cases: List[Tupl
     """
     print(f"{num_passed} test cases passed.")
 
+
     failed_cases_list = []
 
     if num_failed > 0:
         print(f"{num_failed} test cases failed.")
 
-        for i, failed_case in enumerate(failed_cases, start=1):
+        for i, case in enumerate(failed_cases, start=1):
             if i < 10:
-                print(f"{i}. Input: {failed_case[0]}, Expected: {failed_case[1]}, Got: {failed_case[2]}")
-            failed_cases_list.append(
-                {"Input": failed_cases[i][0], "Expected": failed_case[i][1], "Got": failed_cases[i][2]}
-            )
+                print(f"{i}. Input: {case[0]}, Expected: {case[1]}, Got: {case[2]}")
+
+            if write_on_file:
+                failed_cases_list.append(
+                    {"Input": case[0], "Expected": case[1], "Got": case[2]}
+                )
 
         if write_on_file:
             write_failed_cases_to_file(failed_cases_list)

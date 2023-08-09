@@ -1,9 +1,7 @@
 import unittest
 
 
-def uniform(input_str):
-    pass
-
+from mygrader.sample import uniform
 
 class TestStringFunctions(unittest.TestCase):
 

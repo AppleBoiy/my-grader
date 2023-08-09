@@ -3,17 +3,18 @@ import unittest
 import random
 from math import gcd
 
+from mygrader import sample
 
 
 class TestGCDFunction(unittest.TestCase):
-    def test_gcd_random_numbers(self, recursion_gcd=None):
+    def test_gcd_random_numbers(self):
         failed_cases = []
 
         for i in range(1_000_000):
             x = random.randint(1, 10 ** 9)
             y = random.randint(1, 10 ** 9)
             try:
-                self.assertEqual(gcd(x, y), recursion_gcd.gcd(x, y))
+                self.assertEqual(gcd(x, y), sample.gcd(x, y))
             except AssertionError as e:
                 failed_cases.append((x, y, e))
             if (i + 1) % 100_000 == 0:
@@ -29,7 +30,7 @@ class TestGCDFunction(unittest.TestCase):
 
                     if i > 100:
                         break
-                    file.write(f"gcd({x}, {y}) -> Expected: {gcd(x, y)}, Actual: {recursion_gcd.gcd(x, y)}\n")
+                    file.write(f"gcd({x}, {y}) -> Expected: {gcd(x, y)}, Actual: {sample.gcd(x, y)}\n")
         else:
             print("All test cases passed successfully.")
             # Remove the output file if it exists

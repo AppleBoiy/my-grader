@@ -7,9 +7,9 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='mygrader',
-    version='0.2.12',
+    version='0.2.2',
     packages=find_packages(),
-    install_requires=['tabulate'],  # Add any required dependencies here
+    install_requires=['tabulate', 'faker', 'numpy', 'num2words'],  # Add any required dependencies here
     author='AppleBoiy',
 
     author_email='contact.chaipat@gmail.com',

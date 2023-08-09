@@ -1,7 +1,7 @@
 import unittest
 import random
 
-from src.mygrader import print_test_results
+from mygrader import print_test_results
 
 
 def reverse_digits(number: int, reversed_number: int = 0) -> int:

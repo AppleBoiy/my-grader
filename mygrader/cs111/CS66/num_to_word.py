@@ -2,11 +2,9 @@ import unittest
 
 from num2words import num2words
 from numpy import random
-from src.mygrader import print_test_results
+from mygrader import print_test_results
 
-
-def num_to_word(param):
-    pass
+from mygrader.sample import num_to_word
 
 
 class TestNumberToWords(unittest.TestCase):
@@ -109,7 +107,6 @@ class TestNumberToWords(unittest.TestCase):
             except IndexError as err:
                 ...
 
-
             # Generate the expected word representation
             expected = (
                 num2words(num)
@@ -120,7 +117,6 @@ class TestNumberToWords(unittest.TestCase):
                 .replace('thous', 'thousand ')
                 .strip()
             )
-
 
             # Check if reversed_num matches the expected_reversed_num
             if converted != expected:
@@ -135,7 +131,6 @@ class TestNumberToWords(unittest.TestCase):
                 print(f"{num_passed} test cases processed.")
 
         print_test_results(num_passed, num_failed, failed_cases)
-
 
 
 if __name__ == '__main__':

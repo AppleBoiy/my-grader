@@ -9,7 +9,7 @@ This Python script provides functions to display test results and record failed 
 
 ```python
     # Import the functions
-from src.mygrader import print_test_results
+from mygrader import print_test_results
 
 # Example usage
 # Assuming you have a list of failed test cases named 'failed_cases'

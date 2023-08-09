@@ -1,9 +1,7 @@
 import unittest
 import random
 
-
-def base_b(number, base):
-    pass
+from mygrader.sample import base_b
 
 
 class TestConvertBaseTenToBaseB(unittest.TestCase):

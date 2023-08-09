@@ -1,8 +1,6 @@
 import unittest
 
-
-def moving_average(data_points, window_size):
-    pass
+from mygrader.sample import moving_average
 
 
 class TestMovingAverages(unittest.TestCase):

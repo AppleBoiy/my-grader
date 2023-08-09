@@ -1,8 +1,6 @@
 import unittest
 
-
-def substitute_once(text, old, new):
-    pass
+from mygrader.sample import substitute_once
 
 
 class TextSubstitutionTest(unittest.TestCase):

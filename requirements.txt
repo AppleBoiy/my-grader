@@ -1,0 +1,6 @@
+mygrader~=0.2.1
+numpy~=1.25.2
+tabulate~=0.8.10
+setuptools~=68.0.0
+num2words~=0.5.12
+faker~=18.9.0

@@ -1,8 +1,7 @@
 import unittest
 
 
-def print_polynomial(polynomial_1, param):
-    pass
+from mygrader.sample import print_polynomial
 
 
 class TestPolynomialFunctions(unittest.TestCase):

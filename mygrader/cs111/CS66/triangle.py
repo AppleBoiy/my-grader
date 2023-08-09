@@ -1,8 +1,6 @@
 import unittest
 
-
-def triangle(num_rows):
-    pass
+from mygrader.sample import triangle
 
 
 class TestTriangle(unittest.TestCase):
@@ -12,7 +10,6 @@ class TestTriangle(unittest.TestCase):
         num_rows = 3
         expected_output = "* \n*.*\n* * * \n"
         self.assertEqual(triangle(num_rows), expected_output)
-
 
     def test_triangle(self):
         T3 = '''*

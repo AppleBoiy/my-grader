@@ -1,8 +1,6 @@
 import unittest
 
-
-def medal_allocation(param):
-    pass
+from mygrader.sample import medal_allocation
 
 
 class TestMedalAllocation(unittest.TestCase):

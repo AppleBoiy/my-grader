@@ -1,15 +1,12 @@
 import unittest
 import random
 
-from src.mygrader import print_test_results, write_failed_cases_to_file
+from mygrader import print_test_results
 
+from mygrader.sample import reverse_digits
 
 
 # Create a test class that inherits from unittest.TestCase
-def reverse_digits(num):
-    pass
-
-
 class TestReverseDigits(unittest.TestCase):
 
     def test_reverse_digits(self):
@@ -33,10 +30,10 @@ class TestReverseDigits(unittest.TestCase):
 
             # Print prompt every 100,000 cases
             if num_passed % 100000 == 0:
-                print(f"{num_passed} test cases processed.")
+                print(f"{i + 1} out of {num_test_cases} test cases passed.")
 
-        failed_cases = print_test_results(num_passed, num_failed, failed_cases)
-        write_failed_cases_to_file(failed_cases)
+
+        print_test_results(num_passed, num_failed, failed_cases, True)
 
 
 if __name__ == "__main__":

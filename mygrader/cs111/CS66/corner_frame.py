@@ -1,8 +1,7 @@
 import unittest
 
 
-def corner_frame(param):
-    pass
+from mygrader.sample import corner_frame
 
 
 class TestCornerFrame(unittest.TestCase):

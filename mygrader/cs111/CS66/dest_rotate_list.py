@@ -1,8 +1,6 @@
 import unittest
 
-
-def dest_rotate_list(my_list, rotate_by):
-    pass
+from mygrader.sample import dest_rotate_list
 
 
 class TestRotateList(unittest.TestCase):

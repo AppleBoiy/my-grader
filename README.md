@@ -1,6 +1,6 @@
 # Test Results and Failed Cases
 
-This Python script provides functions to display test results and record failed test cases. It includes two functions:
+This Python script provides functions to display test results and record failed test cases.
 
 1. `print_test_results`: This function prints the number of test cases passed and the list of failed test cases. If there are more than 10 failed cases, it displays detailed information for each failed case.
 

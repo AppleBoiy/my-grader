@@ -44,11 +44,17 @@ class Generator:
             num_test_cases (int): Number of test cases to generate.
         """
         test_cases = []
-        for _ in range(num_test_cases):
-            a = random.uniform(0.0, 1000.0)
-            b = random.uniform(0.0, 1000.0)
-            c = random.uniform(0.0, 1000.0)
+        while len(test_cases) < num_test_cases:
+            a = random.uniform(1.0, 100.0)
+            b = random.uniform(1.0, 100.0)
+
+            # Ensure that the sum of a and b is greater than c
+            c_min = abs(a - b) + 0.0001  # Add a small epsilon to avoid floating point precision issues
+            c_max = a + b - 0.0001  # Subtract a small epsilon to avoid floating point precision issues
+
+            c = random.uniform(c_min, c_max)
             test_cases.append((a, b, c))
+
         return test_cases
 
     @classmethod

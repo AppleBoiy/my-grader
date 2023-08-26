@@ -225,19 +225,9 @@ class Tester(unittest.TestCase):
             else:
                 raise ValueError(f"Invalid option: {self.log_option}")
 
-        except (ValueError, FileNotFoundError) as e:
-            print(f"Error: {e}")
-            if self.debug:
-                print(f"Error at line {e.__traceback__.tb_lineno}")
-
         except AttributeError:
             info = sys.exc_info()
             raise AttributeError(f"Invalid function name: {user_func.__name__}") from info[1]
-
-        except Exception as e:
-            if self.debug:
-                print(f"Error at line {e.__traceback__.tb_lineno}: ", e)
-            print("An error occurred while running the test.")
 
     @classmethod
     def __return_type__(cls, func: Callable) -> str:

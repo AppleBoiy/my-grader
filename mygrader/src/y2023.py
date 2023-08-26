@@ -59,6 +59,23 @@ class Generator:
 
         return test_cases
 
+    @classmethod
+    def find_intersection_test_cases(cls, num_test_cases: int) -> List:
+        """
+        Generate a list of test cases with random parameters.
+
+        Args:
+            num_test_cases (int): Number of test cases to generate.
+        """
+        test_cases = []
+        for _ in range(num_test_cases):
+            m1 = random.uniform(0.0, 1000.0)
+            b1 = random.uniform(0.0, 1000.0)
+            m2 = random.uniform(0.0, 1000.0)
+            b2 = random.uniform(0.0, 1000.0)
+            test_cases.append((m1, b1, m2, b2))
+        return test_cases
+
 
 class Solution:
 

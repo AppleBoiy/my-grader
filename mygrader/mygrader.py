@@ -124,11 +124,11 @@ class Tester(unittest.TestCase):
 
         """
 
-        # TODO: Add support for multiple functions
-        # setting the test module and test function
+        func_name = user_func.__name__
+
         try:
+            # TODO: Add support for multiple functions
             test_module = getattr(src, self.year)
-            func_name = user_func.__name__
 
             solver = getattr(test_module.Solution, func_name)
             return_type = self.__return_type__(solver)
@@ -138,71 +138,70 @@ class Tester(unittest.TestCase):
             elif num_test_cases > 1_000_000:
                 raise ValueError("Too many test cases. Please reduce the number of test cases.")
             else:
-                try:
-                    @timeout(5)
-                    def get_random_test_case():
-                        return getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
+                @timeout(5)
+                def get_random_test_case():
+                    return getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
 
+                try:
                     test_cases_params = get_random_test_case()
                 except TimeoutError:
                     raise TimeoutError(f"Runtime limit exceeded for when generating test cases for {func_name}().")
 
-        except AttributeError:
-            info = sys.exc_info()
-            raise AttributeError(f"Invalid function name: {user_func.__name__}") from info[1]
+            if self.debug:
+                print(f'Function: {func_name}')
+                print(f'Runtime limit: {self.runtime_limit} seconds')
+                print(f'Year: {self.year}')
+                print(f'Logging option: {self.log_option}')
+                print(f'Expected return type: {return_type}')
 
-        if self.debug:
-            print(f'Function: {func_name}')
-            print(f'Runtime limit: {self.runtime_limit} seconds')
-            print(f'Year: {self.year}')
-            print(f'Logging option: {self.log_option}')
-            print(f'Expected return type: {return_type}')
+                print(f'Testing... {func_name}() with {num_test_cases} test cases.')
 
-            print(f'Testing... {func_name}() with {num_test_cases} test cases.')
+            @timeout(self.runtime_limit)
+            def run_test_case():
+                start_time = time.time()
+                _passed_count = 0
+                _failed_count = 0
+                _failed_cases = []
 
-        @timeout(self.runtime_limit)
-        def run_test_case():
-            start_time = time.time()
-            _passed_count = 0
-            _failed_count = 0
-            _failed_cases = []
+                for case in tqdm(range(num_test_cases), desc="Running tests", unit="test"):
+                    _input = test_cases_params[case]
 
-            for case in tqdm(range(num_test_cases), desc="Running tests", unit="test"):
-                _input = test_cases_params[case]
+                    if return_type == "None":
+                        _expected = self.capture_printed_text(solver, *_input)
+                        _result = self.capture_printed_text(user_func, *_input)
+                    else:
+                        _expected = solver(*_input)
+                        _result = user_func(*_input)
 
-                if return_type == "None":
-                    _expected = self.capture_printed_text(solver, *_input)
-                    _result = self.capture_printed_text(user_func, *_input)
-                else:
-                    _expected = solver(*_input)
-                    _result = user_func(*_input)
+                    if _expected == _result:
+                        _passed_count += 1
+                    else:
+                        _failed_count += 1
+                        _failed_cases.append({
+                            "input": _input,
+                            "expected": _expected,
+                            "result": _result
+                        })
 
-                if _expected == _result:
-                    _passed_count += 1
-                else:
-                    _failed_count += 1
-                    _failed_cases.append({
-                        "input": _input,
-                        "expected": _expected,
-                        "result": _result
-                    })
+                _total_time = time.time() - start_time
 
-            _total_time = time.time() - start_time
+                return {
+                    "passed_count": _passed_count,
+                    "failed_count": _failed_count,
+                    "total_time_result": _total_time,
+                    "average_time": _total_time / num_test_cases,
+                    "failed_cases": _failed_cases,
+                    "test_per_second": num_test_cases / _total_time,
+                    "success_rate": (_passed_count / num_test_cases) * 100,
 
-            return {
-                "passed_count": _passed_count,
-                "failed_count": _failed_count,
-                "total_time_result": _total_time,
-                "average_time": _total_time / num_test_cases,
-                "failed_cases": _failed_cases,
-                "test_per_second": num_test_cases / _total_time,
-                "success_rate": (_passed_count / num_test_cases) * 100,
+                }
 
-            }
+            # TODO: More options for logging, e.g., JSON, CSV, etc.
+            try:
+                result = run_test_case()
 
-        # TODO: More options for logging, e.g., JSON, CSV, etc.
-        try:
-            result = run_test_case()
+            except TimeoutError:
+                raise TimeoutError(f"Runtime limit exceeded for when run test cases for {func_name}().")
 
             summary_data = {
                 "failed_cases": result["failed_cases"][0:10],
@@ -228,10 +227,16 @@ class Tester(unittest.TestCase):
 
         except (ValueError, FileNotFoundError) as e:
             print(f"Error: {e}")
-            print(f"Error at line {e.__traceback__.tb_lineno}")
+            if self.debug:
+                print(f"Error at line {e.__traceback__.tb_lineno}")
+
+        except AttributeError:
+            info = sys.exc_info()
+            raise AttributeError(f"Invalid function name: {user_func.__name__}") from info[1]
 
         except Exception as e:
-            print(f"Error at line {e.__traceback__.tb_lineno}: ", e)
+            if self.debug:
+                print(f"Error at line {e.__traceback__.tb_lineno}: ", e)
             print("An error occurred while running the test.")
 
     @classmethod

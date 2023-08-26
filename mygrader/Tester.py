@@ -1,7 +1,6 @@
 import sys
 import time
 import unittest
-from importlib import resources
 from typing import Callable, Dict
 
 from tabulate import tabulate
@@ -9,6 +8,7 @@ from timeout_decorator import timeout
 from tqdm import tqdm
 
 from mygrader import Solution
+from mygrader.template import template
 
 
 class Tester(unittest.TestCase):
@@ -37,14 +37,13 @@ class Tester(unittest.TestCase):
 
     @classmethod
     def generate_markdown_summary(
-            cls, summary_data: Dict, template_file: str, show_table: bool = False
+            cls, summary_data: Dict, show_table: bool = False
     ) -> str:
         """
         Generate a markdown summary based on the provided summary data and template.
 
         Args:
             summary_data (Dict): Dictionary containing summary data.
-            template_file (str): Path to the template file.
             show_table (bool): Whether to show the table of failed cases.
 
         Returns:
@@ -59,8 +58,7 @@ class Tester(unittest.TestCase):
             else:
                 table = [["", "", ""]]
 
-            summary_template = resources.read_text('mygrader.template', template_file)
-            summary = summary_template.format(
+            summary = template.format(
                 failed_cases_table=tabulate(table, headers=headers, tablefmt="grid") if show_table else "",
                 passed_count=summary_data["passed_count"],
                 failed_count=summary_data["failed_count"],
@@ -170,8 +168,6 @@ class Tester(unittest.TestCase):
         try:
             result = run_test_case()
 
-            template_file = "template.md"
-
             summary_data = {
                 "failed_cases": result["failed_cases"][0:10],
                 "passed_count": result["passed_count"],
@@ -182,7 +178,7 @@ class Tester(unittest.TestCase):
                 "test_per_second": result["test_per_second"],
             }
 
-            formatted_summary_data = self.generate_markdown_summary(summary_data, template_file, show_table)
+            formatted_summary_data = self.generate_markdown_summary(summary_data, show_table)
 
             if self.log_option == "print":
                 print(formatted_summary_data)

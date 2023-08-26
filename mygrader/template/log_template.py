@@ -1,3 +1,4 @@
+info = """
 # Test Results
 
 ## Summary
@@ -16,3 +17,4 @@ Tests conducted at a rate of: {test_per_second:.2f} tests/second
 
 {failed_cases_table}
 {more_info}
+"""

@@ -33,7 +33,7 @@ Utilize the `Tester` class from MyGrader to test your function. Create a Python 
 with the following code:
 
 ```python
-from mygrader.Tester import Tester
+from mygrader.tester import Tester
 
 
 # Define your user-defined function

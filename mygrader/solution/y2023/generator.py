@@ -48,3 +48,11 @@ class Generator:
             c = random.uniform(0.0, 1000.0)
             test_cases.append((a, b, c))
         return test_cases
+
+    @classmethod
+    def display_time_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            test_cases.append((random.randint(1, 10 ** 20),))
+
+        return test_cases

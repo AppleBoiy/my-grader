@@ -1,13 +1,16 @@
+import contextlib
+import inspect
+import io
 import sys
 import time
 import unittest
-from typing import Callable, Dict
+from typing import Callable, Dict, Iterable
 
 from tabulate import tabulate
 from timeout_decorator import timeout
 from tqdm import tqdm
 
-from mygrader import Solution
+from mygrader import solution
 from mygrader.template import template
 
 
@@ -19,9 +22,12 @@ class Tester(unittest.TestCase):
         year (str): The year for which the tests are being run (e.g., "y2023").
         runtime_limit (float): The maximum runtime allowed for a function.
         log_option (str): The logging option ("print" or "write") for the test summary.
+        debug (bool): If True, enable debug mode for additional information.
     """
 
-    def __init__(self, year: int, runtime_limit: float = 1.0, log_option: str = 'print') -> None:
+    def __init__(
+            self, year: int, runtime_limit: float = 1.0, log_option: str = 'print', debug: bool = False
+    ) -> None:
         """
         Initialize the Tester class.
 
@@ -29,14 +35,23 @@ class Tester(unittest.TestCase):
             year (int): The year for which the tests are being run (e.g., 2023).
             runtime_limit (float): The maximum runtime allowed for a function.
             log_option (str): The logging option ("print" or "write") for the test summary.
+            debug (bool): If True, enable debug mode for additional information.
         """
         super().__init__()
         self.year = f'y{year}'
         self.runtime_limit = runtime_limit
         self.log_option = log_option
+        self.debug = debug
+
+        try:
+            test_module = getattr(solution, self.year)
+            self.test_module = test_module
+        except AttributeError:
+            info = sys.exc_info()
+            raise ValueError(f"Invalid year: {self.year}") from info[1]
 
     @classmethod
-    def generate_markdown_summary(
+    def __generate_markdown_summary(
             cls, summary_data: Dict, show_table: bool = False
     ) -> str:
         """
@@ -83,7 +98,7 @@ class Tester(unittest.TestCase):
     def run_test(
             self,
             user_func: Callable,
-            num_test_cases: int = 1_000_000,
+            num_test_cases: int = 100,
             show_table: bool = False,
     ) -> None:
         """
@@ -100,33 +115,42 @@ class Tester(unittest.TestCase):
         Note:
             This method generates test cases using the appropriate generator function
             for the given user-defined function. It compares the output of the user
-            function with the expected output from the Solution class and calculates
+            function with the expected output from the solution class and calculates
             the success rate. The test results can be printed or written to a file
             based on the provided options.
 
         Example:
-            >>> from mygrader.Tester import Tester
+            >>> from mygrader.tester import Tester
 
-            >>> # Create a Test object (runtime_limit is optional)
+            >>> # Create a Tester object (runtime_limit is optional)
             >>> opt = "print" # Output options ("print" or "write")
             >>> tester = Tester(runtime_limit=4, log_option=opt)
             >>> func = lambda x: x + 1 # User-defined function to be tested
 
-            >>> tester.run_test(2023, func)
+            >>> tester.run_test(func)
 
         """
 
         # TODO: Add support for multiple functions
         try:
-            test_module = getattr(Solution, self.year)
 
-            test_cases_params = getattr(test_module.Generator, f"{user_func.__name__}_test_cases")(num_test_cases)
+            func_name = user_func.__name__
+            solver = getattr(self.test_module.Solution, func_name)
+            return_type = self.__return_type__(solver)
+            test_cases_params = getattr(self.test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
 
         except AttributeError:
             info = sys.exc_info()
             raise AttributeError(f"Invalid function name: {user_func.__name__}") from info[1]
 
-        print(f'Testing... {user_func.__name__}() with {num_test_cases} test cases.')
+        if self.debug:
+            print(f'Function: {func_name}')
+            print(f'Runtime limit: {self.runtime_limit} seconds')
+            print(f'Year: {self.year}')
+            print(f'Logging option: {self.log_option}')
+            print(f'Expected return type: {return_type}')
+
+            print(f'Testing... {func_name}() with {num_test_cases} test cases.')
 
         @timeout(self.runtime_limit)
         def run_test_case():
@@ -138,8 +162,12 @@ class Tester(unittest.TestCase):
             for case in tqdm(range(num_test_cases), desc="Running tests", unit="test"):
                 _input = test_cases_params[case]
 
-                _expected = getattr(test_module.Solution, user_func.__name__)(*_input)
-                _result = user_func(*_input)
+                if return_type == "None":
+                    _expected = self.capture_printed_text(solver, *_input)
+                    _result = self.capture_printed_text(user_func, *_input)
+                else:
+                    _expected = solver(*_input)
+                    _result = user_func(*_input)
 
                 if _expected == _result:
                     _passed_count += 1
@@ -178,13 +206,15 @@ class Tester(unittest.TestCase):
                 "test_per_second": result["test_per_second"],
             }
 
-            formatted_summary_data = self.generate_markdown_summary(summary_data, show_table)
+            formatted_summary_data = self.__generate_markdown_summary(summary_data, show_table)
 
             if self.log_option == "print":
                 print(formatted_summary_data)
             elif self.log_option == "write":
                 with open("test_summary.md", "w") as f:
                     f.write(formatted_summary_data)
+            elif self.log_option == "None":
+                return
             else:
                 raise ValueError(f"Invalid option: {self.log_option}")
 
@@ -195,3 +225,76 @@ class Tester(unittest.TestCase):
         except Exception as e:
             print(f"Error at line {e.__traceback__.tb_lineno}: ", e)
             print("An error occurred while running the test.")
+
+    @classmethod
+    def __return_type__(cls, func: Callable) -> str:
+        """
+        Return the return type of the given function.
+
+        Args:
+            func (Callable): The function to be tested.
+
+        Returns:
+            str: The return type of the given function.
+        """
+        signature = inspect.signature(func)
+        return_annotation = signature.return_annotation
+
+        return str(return_annotation)
+
+    @classmethod
+    def capture_printed_text(cls, func: Callable, *args) -> str:
+        """
+        Capture the printed output of a function.
+
+        Args:
+            func (Callable): The function to capture the printed output from.
+            *args: Arguments to pass to the function.
+
+        Returns:
+            str: The captured printed text.
+
+        Note:
+            This method uses a StringIO buffer and the contextlib.redirect_stdout
+            context manager to capture the printed output of the provided function.
+
+        Example:
+            >>> captured_text = Tester.capture_printed_text(print, "Hello, world!")
+            >>> print(captured_text)
+            Hello, world!
+
+        """
+        # Create a StringIO object to capture the printed text
+        buffer = io.StringIO()
+
+        # Use the redirect_stdout context manager to capture printed output
+        with contextlib.redirect_stdout(buffer):
+            # Call the function with the provided arguments and keyword arguments
+            func(*args)
+
+        # Get the captured printed text
+        printed_text = buffer.getvalue()
+
+        return printed_text
+
+    def __dir__(self) -> Iterable[str]:
+        """
+        Return the list of available functions for the given year.
+
+        Returns:
+            Iterable[str]: List of available functions.
+        """
+        return [func for func in dir(getattr(solution, self.year)) if not func.startswith("__")]
+
+    def __repr__(self) -> str:
+        """
+        Return the list of available functions for the given year.
+
+        Returns:
+            str: List of available functions.
+        """
+        return f"Available functions for {self.year}: {self.__dir__()}"
+
+    def __str__(self) -> str:
+        # TODO: Add more information
+        return f"Tester class for the year {self.year}"

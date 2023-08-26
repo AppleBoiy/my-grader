@@ -1,3 +1,4 @@
+from .Tester import Tester
 from .printer import print_test_results
 from .sample import *
 from .template import *

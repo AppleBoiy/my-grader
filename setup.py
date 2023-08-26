@@ -1,17 +1,20 @@
-from setuptools import setup, find_packages
-
 # read the contents of your README file
 from pathlib import Path
+
+from setuptools import setup, find_packages
+
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='mygrader',
-    version='0.2.21',
+    version='0.3',
     packages=find_packages(),
-    install_requires=['tabulate', 'faker', 'numpy', 'num2words', 'tqdm'],  # Add any required dependencies here
-    author='AppleBoiy',
 
+    # Add any required dependencies here
+    install_requires=['tabulate', 'faker', 'numpy', 'num2words', 'tqdm', 'timeout-decorator'],
+
+    author='AppleBoiy',
     author_email='contact.chaipat@gmail.com',
     description='my own CS111 grader.',
     long_description=long_description,
@@ -42,4 +45,3 @@ setup(
         ],
     },
 )
-

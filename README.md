@@ -1,51 +1,83 @@
-# Test Results and Failed Cases
+# MyGrader - Your Own CS111 Grader
 
-This Python script provides functions to display test results and record failed test cases.
+The **MyGrader** project is a custom testing framework designed to help you test your user-defined functions
+efficiently. It generates test cases, runs them against your functions, and provides detailed summaries of the test
+results. This can be particularly useful for students and developers working on programming assignments.
 
-1. `print_test_results`: This function prints the number of test cases passed and the list of failed test cases. If there are more than 10 failed cases, it displays detailed information for each failed case.
+## Installation
 
+To install MyGrader, you can use `pip`:
+
+```bash
+pip install mygrader
+```
+
+MyGrader has a set of dependencies that will be automatically installed.
 
 ## Usage
 
+1. **Define Your User-Defined Function**
+
+Begin by defining the user-defined function you want to test. For example, let's say you have a
+function `calculate_new_price` that calculates the new price of an item after applying a discount:
+
 ```python
-    # Import the functions
-from mygrader import print_test_results
-
-# Example usage
-# Assuming you have a list of failed test cases named 'failed_cases'
-num_passed = 90
-num_failed = 10
-failed_cases = [
-    ("input_1", "expected_1", "got_1"),
-    ("input_2", "expected_2", "got_2"),
-    ("input_3", "expected_3", "got_3"),
-    ("input_4", "expected_4", "got_4"),
-    ("input_5", "expected_5", "got_5"),
-]
-
-# Call the function to print the results and write failed cases to a file
-print_test_results(num_passed, num_failed, failed_cases, write_on_file=True)
-
-
+def calculate_new_price(old_price):
+    # ... (your code here) ...
+    return new_price
 ```
 
-## Function Descriptions
+2. **Use the Tester Class**
 
-### `display_test_results(num_passed, num_failed, failed_cases)`
+Utilize the `Tester` class from MyGrader to test your function. Create a Python script (e.g., `test_my_function.py`)
+with the following code:
 
-Prints the test results and returns the list of failed cases.
+```python
+from mygrader.Tester import Tester
 
-**Parameters:**
 
-- `num_passed` (int): Number of test cases passed.
-- `num_failed` (int): Number of test cases failed.
-- `failed_cases` (list): List of tuples containing failed test cases.
-- `write_to_file` (bool):
+# Define your user-defined function
+def calculate_new_price(old_price):
+
+
+# ... (your code here) ...
+
+# Create a Tester object
+tester = Tester(year=2023, runtime_limit=4)
+
+# Run tests for the function using 1000 test cases
+tester.run_test(user_func=calculate_new_price, num_test_cases=1000)
+```
+
+3. **View the Test Summary**
+
+After running the tests, you'll see a summary of the results. If you set `log_option` to `'print'`, the summary will be
+printed to the console. If you set it to `'write'`, the summary will be saved to a file named `test_summary.md`.
 
 ## Contributing
 
-Contributions to this project are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
+Contributions to the MyGrader project are welcome! If you encounter issues or have ideas for improvements, please open
+an issue or submit a pull request on [GitHub](https://github.com/AppleBoiy/my-grader).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Project Information
+
+- **Author:** AppleBoiy
+- **GitHub Repository:** [MyGrader on GitHub](https://github.com/AppleBoiy/my-grader)
+
+## Project Status
+
+MyGrader is currently in the alpha development stage. It's actively being worked on and improved. Feel free to
+contribute and help make it even better!
+
+## Project Classifiers
+
+- Development Status: 3 - Alpha
+- Intended Audience: Developers
+- License: MIT License
+- Programming Language: Python 3.8, 3.9, 3.10, 3.11
+
+

@@ -1,16 +1,24 @@
-from mygrader.TestUnit import Test
+from mygrader.Tester import Tester
 
 
-def func(a, b):
-    result = 0
-    for i in range(a, b + 1):
-        result += i
-    return result
+def calculate_new_price(old_price):
+    """
+    Calculates the new price after applying a discount.
+
+    Parameters:
+    - old_price: The original price of the item.
+
+    Returns:
+    The new price after applying the discount.
+    """
+    new_price = int((old_price - 50) / 100) * 100 + 98
+    return new_price + 1
 
 
 if __name__ == '__main__':
-    # Example usage:
-    test_function_name = "calculate_sum"
-    num_test_cases = 900_000
     options = "print"
-    Test.run_test(test_function_name, num_test_cases, options, func)
+    tester = Tester(2023, runtime_limit=4, log_option=options)
+
+    num_test_cases = 1_000_000
+
+    tester.run_test(calculate_new_price, num_test_cases)

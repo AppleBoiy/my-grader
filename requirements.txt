@@ -5,3 +5,4 @@ setuptools
 num2words
 faker
 tqdm
+timeout-decorator

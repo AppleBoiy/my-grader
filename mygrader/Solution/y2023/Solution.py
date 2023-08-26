@@ -1,11 +1,13 @@
 import math
-import unittest
+from typing import Tuple
 
 
 class Solution:
 
     @classmethod
-    def calculate_sum(cls, x, y):
+    def calculate_sum(
+            cls, x: int, y: int
+    ) -> int:
         """
             Calculates the sum of a sequence of numbers.
 
@@ -24,7 +26,9 @@ class Solution:
         return summation
 
     @classmethod
-    def calculate_new_price(cls, old_price):
+    def calculate_new_price(
+            cls, old_price: float
+    ) -> int:
         """
         Calculates the new price after applying a discount.
 
@@ -38,7 +42,9 @@ class Solution:
         return new_price
 
     @classmethod
-    def calculate_triangle_area(cls, a, b, c):
+    def calculate_triangle_area(
+            cls, a: float, b: float, c: float
+    ) -> float:
         """
         Calculates the area of a triangle using Heron's formula.
 
@@ -61,7 +67,9 @@ class Solution:
         return area
 
     @classmethod
-    def display_time(cls, ms):
+    def display_time(
+            cls, ms: int
+    ) -> None:
         """
         The function `display_time` takes in a time in milliseconds and prints it in the format "X day(s), X
         hour(s), X minute(s), X second(s), and X millisecond(s)".
@@ -85,7 +93,9 @@ class Solution:
             f"{day} day(s), {hr} hour(s), {minute} minute(s), {sec} second(s), and {ms} millisecond(s)")
 
     @classmethod
-    def find_intersection(cls, m1, b1, m2, b2):
+    def find_intersection(
+            cls, m1: float, b1: float, m2: float, b2: float
+    ) -> Tuple[float, float]:
         """
         Calculates the intersection point of two lines.
 
@@ -106,7 +116,3 @@ class Solution:
         x = (b2 - b1) / (m1 - m2)
         y = m1 * x + b1
         return x, y
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,5 +1,7 @@
 # MyGrader - Your Own CS111 Grader
 
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AppleBoiy_my-grader&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AppleBoiy_my-grader)
+
 The **MyGrader** project is a custom testing framework designed to help you test your user-defined functions
 efficiently. It generates test cases, runs them against your functions, and provides detailed summaries of the test
 results. This can be particularly useful for students and developers working on programming assignments.

@@ -9,7 +9,7 @@ setup(
     name='mygrader',
     version='0.2.21',
     packages=find_packages(),
-    install_requires=['tabulate', 'faker', 'numpy', 'num2words'],  # Add any required dependencies here
+    install_requires=['tabulate', 'faker', 'numpy', 'num2words', 'tqdm'],  # Add any required dependencies here
     author='AppleBoiy',
 
     author_email='contact.chaipat@gmail.com',

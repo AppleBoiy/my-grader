@@ -19,7 +19,8 @@ MyGrader has a set of dependencies that will be automatically installed.
 1. **Define Your User-Defined Function**
 
 Begin by defining the user-defined function you want to test. For example, let's say you have a
-function `calculate_new_price` that calculates the new price of an item after applying a discount:
+function `calculate_new_price`
+that calculates the new price of an item after applying a discount:
 
 ```python
 def calculate_new_price(old_price):
@@ -30,34 +31,35 @@ def calculate_new_price(old_price):
 2. **Use the Tester Class**
 
 Utilize the `Tester` class from MyGrader to test your function. Create a Python script (e.g., `test_my_function.py`)
-with the following code:
+with the
+following code:
 
 ```python
-from mygrader.tester import Tester
+from mygrader import mygrader
 
 
 # Define your user-defined function
 def calculate_new_price(old_price):
+    # ... (your code here) ...
+    return new_price
 
 
-# ... (your code here) ...
-
-# Create a Tester object
-tester = Tester(year=2023, runtime_limit=4)
-
-# Run tests for the function using 1000 test cases
-tester.run_test(user_func=calculate_new_price, num_test_cases=1000)
+if __name__ == '__main__':
+    tester = mygrader.Tester(year=2023, runtime_limit=0.4, log_option="print")
+    tester.run_test(calculate_new_price, num_test_cases=1000)
 ```
 
 3. **View the Test Summary**
 
 After running the tests, you'll see a summary of the results. If you set `log_option` to `'print'`, the summary will be
-printed to the console. If you set it to `'write'`, the summary will be saved to a file named `test_summary.md`.
+printed
+to the console. If you set it to `'write'`, the summary will be saved to a file named `test_summary.md`.
 
 ## Contributing
 
 Contributions to the MyGrader project are welcome! If you encounter issues or have ideas for improvements, please open
-an issue or submit a pull request on [GitHub](https://github.com/AppleBoiy/my-grader).
+an
+issue or submit a pull request on [GitHub](https://github.com/AppleBoiy/my-grader).
 
 ## License
 
@@ -71,7 +73,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Project Status
 
 MyGrader is currently in the alpha development stage. It's actively being worked on and improved. Feel free to
-contribute and help make it even better!
+contribute and
+help make it even better!
 
 ## Project Classifiers
 
@@ -79,5 +82,3 @@ contribute and help make it even better!
 - Intended Audience: Developers
 - License: MIT License
 - Programming Language: Python 3.8, 3.9, 3.10, 3.11
-
-

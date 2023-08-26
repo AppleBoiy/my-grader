@@ -10,7 +10,7 @@ from tabulate import tabulate
 from timeout_decorator import timeout
 from tqdm import tqdm
 
-from mygrader import solution
+from mygrader import src
 from mygrader.template import template
 
 
@@ -42,13 +42,6 @@ class Tester(unittest.TestCase):
         self.runtime_limit = runtime_limit
         self.log_option = log_option
         self.debug = debug
-
-        try:
-            test_module = getattr(solution, self.year)
-            self.test_module = test_module
-        except AttributeError:
-            info = sys.exc_info()
-            raise ValueError(f"Invalid year: {self.year}") from info[1]
 
     @classmethod
     def __generate_markdown_summary(
@@ -115,12 +108,12 @@ class Tester(unittest.TestCase):
         Note:
             This method generates test cases using the appropriate generator function
             for the given user-defined function. It compares the output of the user
-            function with the expected output from the solution class and calculates
+            function with the expected output from the src class and calculates
             the success rate. The test results can be printed or written to a file
             based on the provided options.
 
         Example:
-            >>> from mygrader.tester import Tester
+            >>> from mygrader import mygrader
 
             >>> # Create a Tester object (runtime_limit is optional)
             >>> opt = "print" # Output options ("print" or "write")
@@ -132,12 +125,27 @@ class Tester(unittest.TestCase):
         """
 
         # TODO: Add support for multiple functions
+        # setting the test module and test function
         try:
-
+            test_module = getattr(src, self.year)
             func_name = user_func.__name__
-            solver = getattr(self.test_module.Solution, func_name)
+
+            solver = getattr(test_module.Solution, func_name)
             return_type = self.__return_type__(solver)
-            test_cases_params = getattr(self.test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
+
+            if num_test_cases < 1:
+                raise ValueError("Number of test cases must be greater than 0.")
+            elif num_test_cases > 1_000_000:
+                raise ValueError("Too many test cases. Please reduce the number of test cases.")
+            else:
+                try:
+                    @timeout(5)
+                    def get_random_test_case():
+                        return getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
+
+                    test_cases_params = get_random_test_case()
+                except TimeoutError:
+                    raise TimeoutError(f"Runtime limit exceeded for when generating test cases for {func_name}().")
 
         except AttributeError:
             info = sys.exc_info()
@@ -284,7 +292,7 @@ class Tester(unittest.TestCase):
         Returns:
             Iterable[str]: List of available functions.
         """
-        return [func for func in dir(getattr(solution, self.year)) if not func.startswith("__")]
+        return [func for func in dir(getattr(src, self.year)) if not func.startswith("__")]
 
     def __repr__(self) -> str:
         """

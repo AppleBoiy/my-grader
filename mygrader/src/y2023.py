@@ -8,12 +8,6 @@ class Generator:
 
     @classmethod
     def calculate_sum_test_cases(cls, num_test_cases: int) -> List:
-        """
-        Generate a list of test cases with random parameters.
-
-        Args:
-            num_test_cases (int): Number of test cases to generate.
-        """
         test_cases = []
         for _ in range(num_test_cases):
             x = random.randint(1, 10 ** 9)  # Generate random x value
@@ -23,12 +17,6 @@ class Generator:
 
     @classmethod
     def calculate_new_price_test_cases(cls, num_test_cases: int) -> List:
-        """
-        Generate a list of test cases with random parameters.
-
-        Args:
-            num_test_cases (int): Number of test cases to generate.
-        """
         test_cases = []
         for _ in range(num_test_cases):
             old_price = random.uniform(0.0, 1000.0)  # Generate random old price between 0 and 1000
@@ -37,12 +25,6 @@ class Generator:
 
     @classmethod
     def calculate_triangle_area_test_cases(cls, num_test_cases: int) -> List:
-        """
-        Generate a list of test cases with random parameters.
-
-        Args:
-            num_test_cases (int): Number of test cases to generate.
-        """
         test_cases = []
         while len(test_cases) < num_test_cases:
             a = random.uniform(1.0, 100.0)
@@ -81,6 +63,39 @@ class Generator:
             b2 = random.uniform(0.0, 1000.0)
             test_cases.append((m1, b1, m2, b2))
         return test_cases
+
+    def __dir__(self) -> Iterable[str]:
+        """
+        Returns a list of all the functions in the Generator class.
+        """
+        return [func for func in dir(Generator) if callable(getattr(Generator, func)) and not func.startswith("__")]
+
+    def __repr__(self) -> str:
+        """
+        Returns a string representation of the Generator class.
+        """
+        return "Generator test cases for the year 2023"
+
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the Generator class.
+        """
+        return "Generator test cases for the year 2023"
+
+    def __getattr__(self, item):
+        """
+        Returns the function corresponding to the attribute name.
+        :param item: Name of the attribute
+        :return: The function corresponding to the attribute name
+        """
+        return getattr(self, item)
+
+    def __len__(self):
+        """
+        Returns the number of functions in the Generator class.
+        """
+        return len(
+            [func for func in dir(Generator) if callable(getattr(Generator, func)) and not func.startswith("__")])
 
 
 class Solution:
@@ -199,3 +214,23 @@ class Solution:
         Returns a string representation of the src class.
         """
         return "src class for the year 2023"
+
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the Solution class.
+        """
+        return "Sample functions to get correct answers"
+
+    def __getattr__(self, item):
+        """
+        Returns the function corresponding to the attribute name.
+        :param item: Name of the attribute
+        :return: The function corresponding to the attribute name
+        """
+        return getattr(self, item)
+
+    def __len__(self):
+        """
+        Returns the number of functions in the Solution class.
+        """
+        return len([func for func in dir(Solution) if callable(getattr(Solution, func)) and not func.startswith("__")])

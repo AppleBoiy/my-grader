@@ -6,10 +6,11 @@ import os
 import sys
 import time
 import unittest
-from typing import Callable, Dict, Iterable, Union, Any
+from multiprocessing import Process, Queue
+from typing import Callable, Dict, Iterable, Any
 
 from tabulate import tabulate
-from timeout_decorator import timeout
+from tqdm import tqdm
 
 from mygrader import src
 from mygrader.template import template
@@ -21,7 +22,6 @@ class Tester(unittest.TestCase):
 
     Attributes:
         year (str): The year for which the tests are being run (e.g., "y2023").
-        runtime_limit (float): The maximum runtime allowed for a function.
         log_option (str): The logging option ("print" or "write") for the test summary.
         debug (bool): If True, enable debug mode for additional information.
     """
@@ -29,27 +29,35 @@ class Tester(unittest.TestCase):
     def __init__(
             self,
             year: int,
-            runtime_limit: Union[float, int] = 1.0,
             log_option: str = 'print',
-            debug: bool = False
+            debug: bool = False,
+            runtime_limit: int = 1
     ) -> None:
         """
         Initialize the Tester class.
 
         Args:
             year (int): The year for which the tests are being run (e.g., 2023).
-            runtime_limit (float): The maximum runtime allowed for a function.
             log_option (str): The logging option ("print" or "write") for the test summary.
             debug (bool): If True, enable debug mode for additional information.
+            runtime_limit (int): The maximum runtime limit (in seconds) for each test case execution.
+
+        Note:
+            The `runtime_limit` parameter defines the maximum time a test case execution is allowed to take.
+            If a test case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
         """
         super().__init__()
         self.year: str = f'y{year}'
-        self.runtime_limit: Union[float, int] = runtime_limit
         self.log_option: str = log_option
         self.debug: bool = debug
+        self.runtime_limit: int = runtime_limit
 
-    @timeout(10)  # Timeout after 10 seconds to avoid too many test cases being generated
-    def run_test(self, user_func: Callable, num_test_cases: int = 100, show_table: bool = False) -> None:
+    def run_test(
+            self,
+            user_func: Callable,
+            num_test_cases: int = 100,
+            show_table: bool = False
+    ) -> None:
         """
         Run tests for the specified function using generated test cases.
 
@@ -61,18 +69,24 @@ class Tester(unittest.TestCase):
         Raises:
             ValueError: If an invalid option is provided.
             AttributeError: If an invalid function name is provided.
+            TimeoutError: If the function execution exceeds the timeout.
 
         Note:
             This method generates test cases, compares function outputs, and calculates success rate.
             Test results can be printed or written to a file based on provided options.
 
+            If a test case execution takes more than the specified runtime_limit (in seconds),
+            the function will raise a TimeoutError and terminate.
+
         Example:
             >>> from mygrader import mygrader
-            >>> tester = Tester(runtime_limit=4, log_option="print")
-            >>> func = lambda x: x + 1
-            >>> tester.run_test(func)
-
+            >>> tester = Tester(year=2023, runtime_limit=5)
+            >>> def add(a, b):
+            ...     return a + b
+            ...
+            >>> tester.run_test(add, num_test_cases=50)
         """
+
         func_name = user_func.__name__
 
         try:
@@ -88,18 +102,32 @@ class Tester(unittest.TestCase):
                 logging.warning(f"Invalid number of test cases: {num_test_cases}")
                 raise ValueError("The number of test cases should be between 1 and 1,000,000.")
 
-            @timeout(self.runtime_limit)
-            def get_random_test_case():
-                return getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
+            test_cases_params = getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
 
-            test_cases_params = get_random_test_case()
+            # Use multiprocessing to run the test with a timeout
+            result_queue = Queue()
+            process = Process(
+                target=self._run_test_case,
+                kwargs={
+                    "user_func": user_func,
+                    "solver": solver,
+                    "test_cases_params": test_cases_params,
+                    "num_test_cases": num_test_cases,
+                    "return_type": return_type,
+                    "result_queue": result_queue,
+                    "show_table": show_table
+                }
+            )
 
-            if self.debug:
-                self.__print_debug_info(func_name, return_type, num_test_cases)
+            process.start()
+            process.join(timeout=self.runtime_limit)
 
-            result = self.__run_test_case(user_func, solver, test_cases_params, num_test_cases, return_type)
+            if process.is_alive():
+                process.terminate()
+                process.join()
+                raise TimeoutError(f"Function {func_name} timed out after {self.runtime_limit} seconds.")
 
-            formatted_summary_data = self.__generate_summary(result, show_table)
+            formatted_summary_data = result_queue.get()
             self.__handle_log_option(formatted_summary_data)
 
         except AttributeError as e:
@@ -153,7 +181,9 @@ class Tester(unittest.TestCase):
         return _type
 
     @classmethod
-    def capture_printed_text(cls, func: Callable, *args: Iterable) -> str:
+    def capture_printed_text(
+            cls, func: Callable, *args: Iterable
+    ) -> str:
         """
         Capture the printed output of a function.
 
@@ -187,113 +217,39 @@ class Tester(unittest.TestCase):
 
         return printed_text
 
-    @staticmethod
-    def __generate_summary(
-            summary_data: Dict, show_table: bool = False
-    ) -> str:
-        """
-        Generate a summary based on the provided summary data and template.
-
-        Args:
-            summary_data (Dict): Dictionary containing summary data.
-            show_table (bool): Whether to show the table of failed cases.
-
-        Returns:
-            str: The formatted summary.
-
-        Raises:
-            FileNotFoundError: If the template format is not found.
-            Exception: If an error occurs while generating the summary.
-
-        Note:
-            This method generates a summary using the provided summary data and a template.
-            It fills in placeholders in the template with the relevant information from the summary data.
-            The generated summary can include a table of failed cases if show_table is True.
-        """
-        try:
-            headers = ["Input", "Expected Output", "Actual Output"]
-            table = []
-            if show_table:
-                for case in summary_data["failed_cases"]:
-                    table.append([case["input"], f'{case["expected"]}'[:10], case["result"]][:10])
-            else:
-                table = [["", "", ""]]
-
-            summary = template.format(
-                failed_cases_table=tabulate(table, headers=headers, tablefmt="grid") if show_table else "",
-                **{f"{key}": summary_data[key] for key in summary_data.keys() if key != "failed_cases"},
-                more_info="Table is disabled" if not show_table else "",
-            )
-
-        except FileNotFoundError as e:
-            print(f"Error: {e}")
-            print(f"Error at line {e.__traceback__.tb_lineno}")
-            raise FileNotFoundError("Template file not found. Please make sure that the template file exists.") from e
-
-        except Exception as e:
-            print(f"Error: {e}")
-            print(f"Error at line {e.__traceback__.tb_lineno}")
-            raise Exception("An error occurred while generating the summary.") from e
-
-        return summary
-
-    @staticmethod
-    def __print_debug_info(func_name, return_type, num_test_cases):
-        """
-        Print debug information.
-
-        Args:
-            func_name (str): The name of the function being tested.
-            return_type (str): The return type of the function being tested.
-            num_test_cases (int): The number of test cases being generated.
-        """
-        logging.debug(f"Function name: {func_name}")
-        logging.debug(f"Return type: {return_type}")
-        logging.debug(f"Number of test cases: {num_test_cases}")
-
-    def __handle_log_option(self, formatted_summary_data):
-        """
-        Handle the logging option for the test summary.
-
-        Args:
-            formatted_summary_data (str): The formatted summary data.
-
-        Raises:
-            ValueError: If an invalid logging option is provided.
-        """
-        if self.log_option == "print":
-            print(formatted_summary_data)
-
-        elif self.log_option == "write":
-            with open(f"{self.year}_test_summary.txt", "w") as f:
-                f.write(formatted_summary_data)
-
-        else:
-            raise ValueError(f"Invalid logging option: {self.log_option}")
-
-    def __run_test_case(self, user_func, solver, test_cases_params, num_test_cases, return_type):
+    def _run_test_case(self: "Tester", **kwargs: Iterable) -> None:
         """
         Run test cases and compare function outputs.
 
         Args:
-            user_func (Callable): The user-defined function to be tested.
-            solver (Callable): The solution function to be tested against.
-            test_cases_params (Iterable): The parameters for the test cases.
-            num_test_cases (int): The number of test cases to generate and run.
+            **kwargs (Dict): Keyword arguments containing the necessary parameters for running the tests:
+                user_func (Callable): The user-defined function to be tested.
+                solver (Callable): The solution function to be tested against.
+                test_cases_params (Iterable): The parameters for the test cases.
+                num_test_cases (int): The number of test cases to generate and run.
+                return_type (str): The return type of the functions being tested.
+                result_queue (Queue): The queue to store the test results.
+                show_table (bool): Whether to show the table of failed cases.
 
         Returns:
-            Dict: A dictionary containing the test results.
+            None
+
+        Note:
+            This method runs test cases using the provided user_func and solver.
+            It compares the outputs of these functions, tracks failures, and calculates test results.
 
         Raises:
-            ValueError: If the function output does not match the expected output.
-            TimeoutError: If the function exceeds the runtime limit.
+            None (Exceptions are caught and handled within the method).
         """
 
-        @timeout(self.runtime_limit / (num_test_cases * 2))
-        def runner(func: Callable, *_params: Iterable) -> Any:
-            if return_type == "None":
-                return self.capture_printed_text(func, *_params)
-            return func(*_params)
+        # Extract keyword arguments for better readability
+        user_func: Callable = kwargs["user_func"]
+        solver: Callable = kwargs["solver"]
+        test_cases_params: Iterable = kwargs["test_cases_params"]
+        num_test_cases: int = kwargs["num_test_cases"]
+        return_type: str = kwargs["return_type"]
+        result_queue: Queue = kwargs["result_queue"]
+        show_table: bool = kwargs["show_table"]
 
         start_time = time.time()
 
@@ -304,10 +260,10 @@ class Tester(unittest.TestCase):
             "failed_cases": []
         }
 
-        for params in test_cases_params:
+        for params in tqdm(test_cases_params, desc="Running test cases", unit="test"):
             try:
-                user_output = runner(user_func, *params)
-                solver_output = runner(solver, *params)
+                user_output = self.__caller(user_func, return_type, *params)
+                solver_output = self.__caller(solver, return_type, *params)
 
                 if user_output == solver_output:
                     result["passed_count"] += 1
@@ -342,7 +298,128 @@ class Tester(unittest.TestCase):
         result["average_time"] = result["total_time_result"] / result["num_test_cases"]
         result["test_per_second"] = result["num_test_cases"] / result["total_time_result"]
 
-        return result
+        result_queue.put(self.__generate_summary(result, show_table))
+
+    @staticmethod
+    def __generate_summary(
+            summary_data: Dict, show_table: bool = False
+    ) -> str:
+        """
+        Generate a summary based on the provided summary data and template.
+
+        Args:
+            summary_data (Dict): Dictionary containing summary data.
+            show_table (bool): Whether to show the table of failed cases.
+
+        Returns:
+            str: The formatted summary.
+
+        Raises:
+            FileNotFoundError: If the template format is not found.
+            Exception: If an error occurs while generating the summary.
+
+        Note:
+            This method generates a summary using the provided summary data and a template.
+            It fills in placeholders in the template with the relevant information from the summary data.
+            The generated summary can include a table of failed cases if show_table is True.
+        """
+        try:
+            headers = ["Input", "Expected Output", "Actual Output"]
+            table = []
+            if show_table:
+                for case in summary_data["failed_cases"][0:3]:
+                    table.append([case["input"], f'{case["expected"]}'[:10], case["result"]][:10])
+            else:
+                table = [["", "", ""]]
+
+            failed_cases_table = tabulate(table, headers=headers, tablefmt="grid") if show_table else ""
+
+            additional_failed_cases_info = ""
+            if show_table and len(summary_data["failed_cases"]) > 3:
+                additional_failed_cases_info = f"\nand more...{len(summary_data['failed_cases']) - 3} cases failed"
+
+            summary_kwargs = {
+                key: value for key, value in summary_data.items() if key != "failed_cases"
+            }
+
+            summary = template.format(
+                failed_cases_table=failed_cases_table,
+                more_info="Table is disabled" if not show_table else additional_failed_cases_info,
+                **summary_kwargs
+            )
+
+
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+            print(f"Error at line {e.__traceback__.tb_lineno}")
+            raise FileNotFoundError("Template file not found. Please make sure that the template file exists.") from e
+
+        except Exception as e:
+            print(f"Error: {e}")
+            print(f"Error at line {e.__traceback__.tb_lineno}")
+            raise Exception("An error occurred while generating the summary.") from e
+
+        return summary
+
+    @staticmethod
+    def __print_debug_info(
+            func_name: str, return_type: str, num_test_cases: int
+    ) -> None:
+        """
+        Print debug information.
+
+        Args:
+            func_name (str): The name of the function being tested.
+            return_type (str): The return type of the function being tested.
+            num_test_cases (int): The number of test cases being generated.
+        """
+        logging.debug(f"Function name: {func_name}")
+        logging.debug(f"Return type: {return_type}")
+        logging.debug(f"Number of test cases: {num_test_cases}")
+
+    def __handle_log_option(
+            self: "Tester", formatted_summary_data: str
+    ) -> None:
+        """
+        Handle the logging option for the test summary.
+
+        Args:
+            formatted_summary_data (str): The formatted summary data.
+
+        Raises:
+            ValueError: If an invalid logging option is provided.
+        """
+        if self.log_option == "print":
+            print(formatted_summary_data)
+
+        elif self.log_option == "write":
+            with open(f"{self.year}_test_summary.txt", "w") as f:
+                f.write(formatted_summary_data)
+
+        else:
+            raise ValueError(f"Invalid logging option: {self.log_option}")
+
+    @classmethod
+    def __caller(
+            cls: "Tester",
+            func: Callable,
+            return_type: str,
+            *args: Iterable
+    ) -> Any:
+        """
+        Execute the specified function and capture the output.
+
+        Args:
+            func (Callable): The function to be executed.
+            *args (Iterable): The arguments to pass to the function.
+
+        Returns:
+            str: The output of the function, captured as a string.
+        """
+        if return_type == "None":
+            return cls.capture_printed_text(func, *args)
+        else:
+            return func(*args)
 
     def __dir__(self) -> Iterable[str]:
         """

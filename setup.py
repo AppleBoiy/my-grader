@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
 
     # Add any required dependencies here
-    install_requires=['tabulate', 'faker', 'numpy', 'num2words', 'tqdm', 'timeout-decorator'],
+    install_requires=['tabulate', 'faker', 'numpy', 'num2words', 'tqdm'],
 
     author='AppleBoiy',
     author_email='contact.chaipat@gmail.com',

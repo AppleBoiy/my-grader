@@ -1,4 +1,3 @@
-# read the contents of your README file
 from pathlib import Path
 
 from setuptools import setup, find_packages

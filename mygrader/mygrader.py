@@ -82,11 +82,11 @@ class Tester(unittest.TestCase):
             solver_return = self.return_type(solver)
 
             if return_type != solver_return:
-                raise ValueError(f"Mismatched return type: {return_type} != {solver_return}")
+                raise ValueError(f"Mismatched return type expected: {solver_return}, got: {return_type}")
 
             if not 1 <= num_test_cases <= 1_000_000:
                 logging.warning(f"Invalid number of test cases: {num_test_cases}")
-                raise ValueError(f"The number of test cases should be between 1 and 1,000,000.")
+                raise ValueError("The number of test cases should be between 1 and 1,000,000.")
 
             @timeout(self.runtime_limit)
             def get_random_test_case():
@@ -131,6 +131,7 @@ class Tester(unittest.TestCase):
         """
         original_stdout = sys.stdout
         sys.stdout = open(os.devnull, 'w')  # Redirect stdout to null device
+        _type = None
 
         try:
             signature = inspect.signature(func)
@@ -138,24 +139,18 @@ class Tester(unittest.TestCase):
 
             if return_annotation is inspect.Signature.empty:
                 generator = getattr(src.Generator, f"{func.__name__}_test_cases")
-
                 sample = generator(1)
-                solver = getattr(src.Solution, func.__name__)
+                return_annotation = type(func(*sample[0]))
 
-                if cls.return_type(solver) == '<class \'NoneType\'>':
-                    return_annotation = 'None'
-                else:
-                    # Get the return type of the function by calling it with a sample test case
-                    return_annotation = type(func(*sample[0]))
-
-            return str(return_annotation)
+            _type = 'None' if str(return_annotation) == "<class 'NoneType'>" else str(return_annotation)
 
         except AttributeError:
-            error_msg = f"Function not found in the Generator class: {func.__name__}"
-            raise AttributeError(error_msg)
+            raise AttributeError(f"Function not found in the Generator class: {func.__name__}")
 
         finally:
             sys.stdout = original_stdout  # Restore original stdout
+
+        return _type
 
     @classmethod
     def capture_printed_text(cls, func: Callable, *args: Iterable) -> str:

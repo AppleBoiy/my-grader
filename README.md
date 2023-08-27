@@ -6,6 +6,11 @@ The **MyGrader** project is a custom testing framework designed to help you test
 efficiently. It generates test cases, runs them against your functions, and provides detailed summaries of the test
 results. This can be particularly useful for students and developers working on programming assignments.
 
+## Project Status
+
+MyGrader is currently in the alpha development stage. It's actively being worked on and improved. Feel free to
+contribute and help make it even better!
+
 ## Table of Contents
 
 - [Usage](#usage)
@@ -14,9 +19,6 @@ results. This can be particularly useful for students and developers working on 
 - [Methods](#methods)
 - [Contributing](#contributing)
 - [License](#license)
-- [Project Information](#project-information)
-- [Project Status](#project-status)
-- [Project Classifiers](#project-classifiers)
 
 ## Usage
 
@@ -88,20 +90,3 @@ an issue or submit a pull request on [GitHub](https://github.com/AppleBoiy/my-gr
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Project Information
-
-- **Author:** AppleBoiy
-- **GitHub Repository:** [MyGrader on GitHub](https://github.com/AppleBoiy/my-grader)
-
-## Project Status
-
-MyGrader is currently in the alpha development stage. It's actively being worked on and improved. Feel free to
-contribute and help make it even better!
-
-## Project Classifiers
-
-- Development Status: 3 - Alpha
-- Intended Audience: Developers
-- License: MIT License
-- Programming Language: Python 3.8, 3.9, 3.10, 3.11

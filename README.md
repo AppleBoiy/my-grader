@@ -12,7 +12,6 @@ results. This can be particularly useful for students and developers working on 
 - [Installation](#installation)
 - [Attributes](#attributes)
 - [Methods](#methods)
-- [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
 - [Project Information](#project-information)
@@ -23,47 +22,39 @@ results. This can be particularly useful for students and developers working on 
 
 1. **Define Your User-Defined Function**
 
-Begin by defining the user-defined function you want to test. For example, let's say you have a
-function `calculate_new_price` that calculates the new price of an item after applying a discount:
+   Begin by defining the user-defined function you want to test. For example, let's say you have a
+   function `calculate_new_price` that calculates the new price of an item after applying a discount:
+    ```python
+    def calculate_new_price(old_price):
+        # ... (your code here) ...
+        return new_price
+    ```
 
-```python
-def calculate_new_price(old_price):
-    # ... (your code here) ...
-    return new_price
-```
+2. **Use the Tester Class**
 
-2. **Install MyGrader**
+   Utilize the `Tester` class from MyGrader to test your function. Create a Python script (e.g., `test_my_function.py`)
+   with the following code:
 
-Install the MyGrader package using pip:
+    ```python
+    from mygrader import mygrader
+    
+    
+    # Define your user-defined function
+    def calculate_new_price(old_price):
+        # ... (your code here) ...
+        return new_price
+    
+    
+    if __name__ == '__main__':
+        tester = mygrader.Tester(year=2023, runtime_limit=0.4, log_option="print")
+        tester.run_test(calculate_new_price, num_test_cases=1000)
+    ```
 
-```bash
-pip install mygrader
-```
+3. **View the Test Summary**
 
-3. **Use the Tester Class**
-
-Utilize the `Tester` class from MyGrader to test your function. Create a Python script (e.g., `test_my_function.py`)
-with the following code:
-
-```python
-from mygrader import mygrader
-
-
-# Define your user-defined function
-def calculate_new_price(old_price):
-    # ... (your code here) ...
-    return new_price
-
-
-if __name__ == '__main__':
-    tester = mygrader.Tester(year=2023, runtime_limit=0.4, log_option="print")
-    tester.run_test(calculate_new_price, num_test_cases=1000)
-```
-
-4. **View the Test Summary**
-
-After running the tests, you'll see a summary of the results. If you set `log_option` to `'print'`, the summary will be
-printed to the console. If you set it to `'write'`, the summary will be saved to a file named `test_summary.md`.
+   After running the tests, you'll see a summary of the results. If you set `log_option` to `'print'`, the summary will
+   be
+   printed to the console. If you set it to `'write'`, the summary will be saved to a file named `test_summary.md`.
 
 ## Installation
 
@@ -75,8 +66,8 @@ pip install mygrader
 
 ## Attributes
 
-- `year`: The year for which the tests are being run.
-- `runtime_limit`: The maximum runtime allowed for a function.
+- `year`: The year of class (Assignments are assigned by year).
+- `runtime_limit`: The maximum runtime allowed for test cases (in seconds)
 - `log_option`: The logging option ("print" or "write") for the test summary.
 - `debug`: If `True`, enable debug mode for additional information.
 
@@ -88,24 +79,6 @@ pip install mygrader
 - `__dir__()`: Return the list of available functions for the given year.
 - `__repr__()`: Return a string representation of available functions for the given year.
 - `__str__()`: Return a string representation of the Tester class for the given year.
-
-## Examples
-
-Here are a few examples to demonstrate how to use the `Tester` class:
-
-```python
-# Create a Tester object
-tester = mygrader.Tester(year=2023, runtime_limit=2, log_option="print")
-
-
-# Define the user-defined function to be tested
-def square(x):
-    return x ** 2
-
-
-# Run tests on the user-defined function
-tester.run_test(square, num_test_cases=50, show_table=True)
-```
 
 ## Contributing
 

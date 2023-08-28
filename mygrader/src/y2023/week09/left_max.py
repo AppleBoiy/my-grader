@@ -25,4 +25,4 @@ if __name__ == '__main__':
     assert left_max([2, 8, 1]) == [2, 8, 8]
     assert left_max([1]) == [1]
 
-    print("All test cases passed!")
+    print("All tests cases passed!")

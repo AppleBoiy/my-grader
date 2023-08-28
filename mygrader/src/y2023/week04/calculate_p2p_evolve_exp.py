@@ -35,7 +35,7 @@ def test():
     assert calculate_p2p_evolve_exp(2, 12) == 500
     assert calculate_p2p_evolve_exp(2, 22) == 1000
 
-    print("All test cases passed successfully.")
+    print("All tests cases passed successfully.")
 
 
 if __name__ == '__main__':

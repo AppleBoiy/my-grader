@@ -3,11 +3,10 @@ import unittest
 from sample import print_polynomial
 
 
-
 class TestPolynomialFunctions(unittest.TestCase):
 
     def setUp(self):
-        # Common data setup for multiple test cases
+        # Common data setup for multiple tests cases
         self.polynomial_1 = [(1, 1), (2, 1), (3, 1), (4, 1), (5, 1)]
         self.polynomial_2 = [(1, 2), (0, -10), (14, -7), (1, 0)]
         self.polynomial_3 = [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]

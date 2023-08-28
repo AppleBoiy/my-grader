@@ -16,7 +16,7 @@ class TestLifePath(unittest.TestCase):
         failed = 0
         total_time = 0
 
-        with tqdm(total=num_test_cases, unit='test') as pbar:
+        with tqdm(total=num_test_cases, unit='tests') as pbar:
 
             for i in range(num_test_cases):
                 n = random.randint(0, 10 ** 100)
@@ -46,7 +46,7 @@ class TestLifePath(unittest.TestCase):
 
         print(f"Test cases passed: {passed}")
         print(f"Test cases failed: {failed}")
-        print(f"Average time per test case: {average_time:.5f} seconds")
+        print(f"Average time per tests case: {average_time:.5f} seconds")
         print(f"Total time taken: {total_time:.2f} seconds")
 
 

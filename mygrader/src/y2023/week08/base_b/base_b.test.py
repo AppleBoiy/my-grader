@@ -33,17 +33,17 @@ class TestConvertBaseTenToBaseB(unittest.TestCase):
                             (number, base, str(err))
                         )
 
-            # Display prompt after every 10000 successful test cases
+            # Display prompt after every 10000 successful tests cases
             if (i + 1) % prompt_interval == 0:
-                print(f"{i + 1} out of {total_cases} test cases passed.")
+                print(f"{i + 1} out of {total_cases} tests cases passed.")
 
-        # Final prompt with the total number of passed test cases
+        # Final prompt with the total number of passed tests cases
         print(f"\nTest Results:")
-        print(f"Total test cases: {total_cases}")
-        print(f"Passed test cases: {total_cases - len(failed_cases)}")
-        print(f"Failed test cases: {len(failed_cases)}")
+        print(f"Total tests cases: {total_cases}")
+        print(f"Passed tests cases: {total_cases - len(failed_cases)}")
+        print(f"Failed tests cases: {len(failed_cases)}")
 
-        # Print the details of the failed test cases (limit to 10 for brevity)
+        # Print the details of the failed tests cases (limit to 10 for brevity)
         if failed_cases:
             print("\nFailed Test Cases:")
             for number, base, error_msg in failed_cases[:10]:

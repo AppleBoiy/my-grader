@@ -1,7 +1,7 @@
 import math
 import random
 from typing import List
-from typing import Tuple, Iterable
+from typing import Tuple
 
 
 class Helper:
@@ -118,40 +118,6 @@ class Generator:
             value = random.randint(0, 9)
             test_cases.append((number, k, value))
         return test_cases
-
-    def __dir__(self) -> Iterable[str]:
-        """
-        Returns a list of all the functions in the Generator class.
-        """
-        return [func for func in dir(Generator) if callable(getattr(Generator, func)) and not func.startswith("__")]
-
-    def __repr__(self) -> str:
-        """
-        Returns a string representation of the Generator class.
-        """
-        return "Generator tests cases for the year 2023"
-
-    def __str__(self) -> str:
-        """
-        Returns a string representation of the Generator class.
-        """
-        return "Generator tests cases for the year 2023"
-
-    def __getattr__(self, item):
-        """
-        Returns the function corresponding to the attribute name.
-        :param item: Name of the attribute
-        :return: The function corresponding to the attribute name
-        """
-        return getattr(self, item)
-
-    def __len__(self):
-        """
-        Returns the number of functions in the Generator class.
-        """
-        return len(
-            [func for func in dir(Generator) if callable(getattr(Generator, func)) and not func.startswith("__")]
-        )
 
 
 class Solution(Helper):
@@ -310,35 +276,3 @@ class Solution(Helper):
         new_kth = value * coeff
         result = number - kth + new_kth
         return result
-
-    def __dir__(self) -> Iterable[str]:
-        """
-        Returns a list of all the functions in the src class.
-        """
-        return [func for func in dir(Solution) if callable(getattr(Solution, func)) and not func.startswith("__")]
-
-    def __repr__(self) -> str:
-        """
-        Returns a string representation of the src class.
-        """
-        return "src class for the year 2023"
-
-    def __str__(self) -> str:
-        """
-        Returns a string representation of the Solution class.
-        """
-        return "Sample functions to get correct answers"
-
-    def __getattr__(self, item):
-        """
-        Returns the function corresponding to the attribute name.
-        :param item: Name of the attribute
-        :return: The function corresponding to the attribute name
-        """
-        return getattr(self, item)
-
-    def __len__(self):
-        """
-        Returns the number of functions in the Solution class.
-        """
-        return len([func for func in dir(Solution) if callable(getattr(Solution, func)) and not func.startswith("__")])

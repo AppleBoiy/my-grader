@@ -1,4 +1,11 @@
-info = """
+simple = """Test Results:
++-----------------+------------+
+|  Passed         | {passed_count:-7d}    |
+|  Failed         | {failed_count:-7d}    |
+|  Success Rate   | {success_rate:8.2f}%  |
++-----------------+------------+"""
+
+more_info = """
 # Test Results
 
 ## Summary

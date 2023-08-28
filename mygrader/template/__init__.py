@@ -1,1 +1,1 @@
-from .log_template import info as template
+from .log_template import more_info, simple

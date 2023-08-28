@@ -12,8 +12,7 @@ from typing import Callable, Dict, Iterable, Any
 from tabulate import tabulate
 from tqdm import tqdm
 
-from mygrader import src
-from mygrader.template import template
+from mygrader import src, template
 
 
 class Tester(unittest.TestCase):
@@ -56,7 +55,8 @@ class Tester(unittest.TestCase):
             self,
             user_func: Callable,
             num_test_cases: int = 100,
-            show_table: bool = False
+            more_detail: bool = False,
+            show_table: bool = False,
     ) -> None:
         """
         Run tests for the specified function using generated test cases.
@@ -65,6 +65,7 @@ class Tester(unittest.TestCase):
             user_func (Callable): The user-defined function to be tested.
             num_test_cases (int): The number of test cases to generate and run.
             show_table (bool): Whether to show the table of failed cases.
+            more_detail (bool):
 
         Raises:
             ValueError: If an invalid option is provided.
@@ -115,7 +116,8 @@ class Tester(unittest.TestCase):
                     "num_test_cases": num_test_cases,
                     "return_type": return_type,
                     "result_queue": result_queue,
-                    "show_table": show_table
+                    "show_table": show_table,
+                    "more_detail": more_detail
                 }
             )
 
@@ -210,12 +212,15 @@ class Tester(unittest.TestCase):
         # Use the redirect_stdout context manager to capture printed output
         with contextlib.redirect_stdout(buffer):
             # Call the function with the provided arguments and keyword arguments
-            func(*args)
+            result = func(*args)
 
         # Get the captured printed text
         printed_text: str = buffer.getvalue()
 
-        return printed_text
+        return {
+            "result": result,
+            "printed_text": printed_text
+        }
 
     def _run_test_case(self: "Tester", **kwargs: Iterable) -> None:
         """
@@ -223,13 +228,14 @@ class Tester(unittest.TestCase):
 
         Args:
             **kwargs (Dict): Keyword arguments containing the necessary parameters for running the tests:
-                user_func (Callable): The user-defined function to be tested.
-                solver (Callable): The solution function to be tested against.
-                test_cases_params (Iterable): The parameters for the test cases.
-                num_test_cases (int): The number of test cases to generate and run.
-                return_type (str): The return type of the functions being tested.
-                result_queue (Queue): The queue to store the test results.
-                show_table (bool): Whether to show the table of failed cases.
+
+            :param user_func: Callable, the user-defined function to be tested.
+            :param solver: Callable, the solution function to be tested against.
+            :param test_cases_params: Iterable, the parameters for the test cases.
+            :param num_test_cases: int, the number of test cases to generate and run.
+            :param return_type: str, the return type of the functions being tested.
+            :param result_queue: Queue, the queue to store the test results.
+            :param show_table: bool, whether to show the table of failed cases.
 
         Returns:
             None
@@ -239,7 +245,8 @@ class Tester(unittest.TestCase):
             It compares the outputs of these functions, tracks failures, and calculates test results.
 
         Raises:
-            None (Exceptions are caught and handled within the method).
+            TimeoutError: If the function execution exceeds the timeout.
+            Exception: If an error occurs while generating the summary.
         """
 
         # Extract keyword arguments for better readability
@@ -253,12 +260,9 @@ class Tester(unittest.TestCase):
 
         start_time = time.time()
 
-        result = {
-            "num_test_cases": num_test_cases,
-            "passed_count": 0,
-            "failed_count": 0,
-            "failed_cases": []
-        }
+        passed_count = 0
+        failed_count = 0
+        failed_cases = []
 
         for params in tqdm(test_cases_params, desc="Running test cases", unit="test"):
             try:
@@ -266,43 +270,50 @@ class Tester(unittest.TestCase):
                 solver_output = self.__caller(solver, return_type, *params)
 
                 if user_output == solver_output:
-                    result["passed_count"] += 1
+                    passed_count += 1
                 else:
-                    result["failed_count"] += 1
-                    result["failed_cases"].append({
+                    failed_count += 1
+                    failed_cases.append({
                         "input": params,
                         "expected": solver_output,
                         "result": user_output
                     })
 
             except TimeoutError:
-                result["failed_count"] += 1
-                result["failed_cases"].append({
+                failed_count += 1
+                failed_cases.append({
                     "input": params,
                     "expected": "Timeout",
                     "result": "Timeout"
                 })
 
             except Exception as e:
-                result["failed_count"] += 1
-                result["failed_cases"].append({
+                failed_count += 1
+                failed_cases.append({
                     "input": params,
                     "expected": "Error",
                     "result": f"Error: {e}"
                 })
 
         end_time = time.time()
+        total_time = end_time - start_time
 
-        result["success_rate"] = (result["passed_count"] / result["num_test_cases"]) * 100
-        result["total_time_result"] = end_time - start_time
-        result["average_time"] = result["total_time_result"] / result["num_test_cases"]
-        result["test_per_second"] = result["num_test_cases"] / result["total_time_result"]
+        summary = self.__generate_summary({
+            "passed_count": passed_count,
+            "failed_count": failed_count,
+            "failed_cases": failed_cases,
+            "success_rate": (passed_count / num_test_cases) * 100,
+            "total_time_result": total_time,
+            "average_time": total_time / num_test_cases,
+            "test_per_second": num_test_cases / total_time
 
-        result_queue.put(self.__generate_summary(result, show_table))
+        }, kwargs["more_detail"], show_table)
+
+        result_queue.put(summary)
 
     @staticmethod
     def __generate_summary(
-            summary_data: Dict, show_table: bool = False
+            summary_data: Dict, more_detail: bool = False, show_table: bool = False
     ) -> str:
         """
         Generate a summary based on the provided summary data and template.
@@ -342,11 +353,14 @@ class Tester(unittest.TestCase):
                 key: value for key, value in summary_data.items() if key != "failed_cases"
             }
 
-            summary = template.format(
-                failed_cases_table=failed_cases_table,
-                more_info="Table is disabled" if not show_table else additional_failed_cases_info,
-                **summary_kwargs
-            )
+            if more_detail:
+                summary = template.more_info.format(
+                    failed_cases_table=failed_cases_table,
+                    more_info="Table is disabled" if not show_table else additional_failed_cases_info,
+                    **summary_kwargs
+                )
+            else:
+                summary = template.simple.format(**summary_kwargs)
 
 
         except FileNotFoundError as e:
@@ -416,10 +430,12 @@ class Tester(unittest.TestCase):
         Returns:
             str: The output of the function, captured as a string.
         """
-        if return_type == "None":
-            return cls.capture_printed_text(func, *args)
-        else:
-            return func(*args)
+        captured_output = cls.capture_printed_text(func, *args)
+
+        if return_type == 'None':
+            return captured_output["printed_text"]
+
+        return captured_output["result"]
 
     def __dir__(self) -> Iterable[str]:
         """

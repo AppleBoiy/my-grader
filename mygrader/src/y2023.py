@@ -1,7 +1,6 @@
 import math
 import random
 from typing import List
-from typing import Tuple
 
 
 class Helper:
@@ -203,7 +202,7 @@ class Solution(Helper):
             f"{day} day(s), {hr} hour(s), {minute} minute(s), {sec} second(s), and {ms} millisecond(s)")
 
     @classmethod
-    def find_intersection(cls, m1: float, b1: float, m2: float, b2: float) -> Tuple[float, float]:
+    def find_intersection(cls, m1: float, b1: float, m2: float, b2: float) -> tuple:
         """
         Calculates the intersection point of two lines.
 

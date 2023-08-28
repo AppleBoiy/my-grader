@@ -6,10 +6,20 @@ The **MyGrader** project is a custom testing framework designed to help you test
 efficiently. It generates test cases, runs them against your functions, and provides detailed summaries of the test
 results. This can be particularly useful for students and developers working on programming assignments.
 
-## Project Status
-
 MyGrader is currently in the alpha development stage. It's actively being worked on and improved. Feel free to
 contribute and help make it even better!
+
+## Switching to Stable Version
+
+If you're currently on the `candidate` branch and want to switch to a stable version of MyGrader, you can follow these steps:
+
+1. **Browse the Releases**
+
+   Visit the [Releases](https://github.com/AppleBoiy/my-grader/releases) page on GitHub to find the list of available releases.
+
+2. **Select a Stable Release**
+
+   From the list of releases, choose the stable version you want to switch to. Stable versions are typically tagged with names like `stable0.43`.
 
 ## Table of Contents
 

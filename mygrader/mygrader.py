@@ -264,7 +264,7 @@ class Tester(unittest.TestCase):
         failed_count = 0
         failed_cases = []
 
-        for params in tqdm(test_cases_params, desc="Running tests cases", unit="tests"):
+        for params in tqdm(test_cases_params, desc="Running tests cases", unit="tests", disable=self.debug):
             try:
                 user_output = self.__caller(user_func, return_type, *params)
                 solver_output = self.__caller(solver, return_type, *params)

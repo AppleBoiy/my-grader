@@ -185,7 +185,7 @@ class Tester(unittest.TestCase):
     @classmethod
     def capture_printed_text(
             cls, func: Callable, *args: Iterable
-    ) -> str:
+    ) -> Dict[str, Any]:
         """
         Capture the printed output of a function.
 
@@ -368,28 +368,7 @@ class Tester(unittest.TestCase):
             print(f"Error at line {e.__traceback__.tb_lineno}")
             raise FileNotFoundError("Template file not found. Please make sure that the template file exists.") from e
 
-        except Exception as e:
-            print(f"Error: {e}")
-            print(f"Error at line {e.__traceback__.tb_lineno}")
-            raise Exception("An error occurred while generating the summary.") from e
-
         return summary
-
-    @staticmethod
-    def __print_debug_info(
-            func_name: str, return_type: str, num_test_cases: int
-    ) -> None:
-        """
-        Print debug information.
-
-        Args:
-            func_name (str): The name of the function being tested.
-            return_type (str): The return type of the function being tested.
-            num_test_cases (int): The number of test cases being generated.
-        """
-        logging.debug(f"Function name: {func_name}")
-        logging.debug(f"Return type: {return_type}")
-        logging.debug(f"Number of test cases: {num_test_cases}")
 
     def __handle_log_option(
             self: "Tester", formatted_summary_data: str

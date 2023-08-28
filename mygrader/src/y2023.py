@@ -4,6 +4,10 @@ from typing import List
 from typing import Tuple, Iterable
 
 
+class Helper:
+    ...
+
+
 class Generator:
 
     @classmethod
@@ -64,6 +68,57 @@ class Generator:
             test_cases.append((m1, b1, m2, b2))
         return test_cases
 
+    @classmethod
+    def find_r_from_surface_area_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            surface_area = random.uniform(0.0, 1000.0)
+            test_cases.append((surface_area,))
+        return test_cases
+
+    @classmethod
+    def sphere_volume_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            radius = random.uniform(0.0, 1000.0)
+            test_cases.append((radius,))
+        return test_cases
+
+    @classmethod
+    def kth_digit_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            number = random.randint(0, 10 ** 9)
+            k = random.randint(0, 9)
+            test_cases.append((number, k))
+        return test_cases
+
+    @classmethod
+    def nearest_odd_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            x = random.uniform(0.0, 1000.0)
+            test_cases.append((x,))
+        return test_cases
+
+    @classmethod
+    def octagon_area_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            side_length = random.uniform(0.0, 1000.0)
+            test_cases.append((side_length,))
+        return test_cases
+
+    @classmethod
+    def set_kth_digit_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            number = random.randint(0, 10 ** 9)
+            k = random.randint(0, 9)
+            value = random.randint(0, 9)
+            test_cases.append((number, k, value))
+        return test_cases
+
     def __dir__(self) -> Iterable[str]:
         """
         Returns a list of all the functions in the Generator class.
@@ -95,10 +150,11 @@ class Generator:
         Returns the number of functions in the Generator class.
         """
         return len(
-            [func for func in dir(Generator) if callable(getattr(Generator, func)) and not func.startswith("__")])
+            [func for func in dir(Generator) if callable(getattr(Generator, func)) and not func.startswith("__")]
+        )
 
 
-class Solution:
+class Solution(Helper):
 
     @classmethod
     def calculate_sum(cls, x: int, y: int) -> int:
@@ -202,6 +258,58 @@ class Solution:
         x = (b2 - b1) / (m1 - m2)
         y = m1 * x + b1
         return x, y
+
+    @classmethod
+    def find_r_from_surface_area(cls, surface_area: float) -> float:
+        """
+        Calculates and returns the radius of a sphere given its surface area.
+        """
+        radius = (surface_area / (4 * math.pi)) ** 0.5
+        return radius
+
+    @classmethod
+    def sphere_volume(cls, radius: float) -> float:
+        """
+        Calculates and returns the volume of a sphere given its radius.
+        """
+        volume = (4 / 3) * math.pi * radius ** 3
+        return volume
+
+    @classmethod
+    def kth_digit(cls, number: int, k: int) -> int:
+        """
+        Returns the k-th digit of the given number.
+        """
+        num_str = str(number)
+        kth_digit_index = len(num_str) - k - 1
+        return int(num_str[kth_digit_index])
+
+    @classmethod
+    def nearest_odd(cls, x: float) -> int:
+        """
+        Returns the nearest odd integer to the given number x.
+        """
+        return math.ceil(x / 2) * 2 - 1
+
+    @classmethod
+    def octagon_area(cls, side_length: float) -> float:
+        """
+        Calculates and returns the area of an octagon given the side length.
+        """
+        full_area = side_length ** 2
+        outer_white_area = ((side_length / 3) ** 2) * 2
+        return full_area - outer_white_area
+
+    @classmethod
+    def set_kth_digit(cls, number: int, k: int, value: int) -> int:
+        """
+        Replaces the kth digit of a given number with the specified value.
+        """
+        coeff = 10 ** k
+        kth = cls.kth_digit(number, k) * coeff
+        new_kth = value * coeff
+        result = number - kth + new_kth
+        return result
 
     def __dir__(self) -> Iterable[str]:
         """

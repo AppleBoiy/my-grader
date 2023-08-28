@@ -35,11 +35,11 @@ def test_create_tester():
 
 def test_run_test():
     tester = Tester(2023, debug=True)
-
+    solver = Solution()
     try:
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
-            tester.run_test(Solution.sphere_volume, num_test_cases=1000)
+            tester.run_test(solver.sphere_volume, num_test_cases=1000)
 
     except Exception as e:
         assert False, f"Failed to run test: {e}"
@@ -49,11 +49,13 @@ def test_run_test():
 def test_run_test_with_runtime_limit():
     tester = Tester(2023, runtime_limit=0.1, debug=True)
 
+    solver = Solution()
+
     try:
         buffer = io.StringIO()
         with contextlib.redirect_stderr(buffer):
             # Run the test cases with the sphere_volume function from Solution class
-            tester.run_test(Solution.sphere_volume, num_test_cases=1000000)
+            tester.run_test(solver.sphere_volume, num_test_cases=1000000)
 
         # If the code execution completes within the time limit, this point is reached
         assert False, "Failed to raise exception when runtime limit is exceeded"

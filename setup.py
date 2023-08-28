@@ -37,7 +37,7 @@ setup(
         ],
     },
     extras_require={
-        'test': [
+        'tests': [
             'pytest',
             'coverage',
             'pytest-cov'

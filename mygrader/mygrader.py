@@ -17,11 +17,11 @@ from mygrader import src, template
 
 class Tester(unittest.TestCase):
     """
-    A test class to run tests on user-defined functions.
+    A tests class to run tests on user-defined functions.
 
     Attributes:
         year (str): The year for which the tests are being run (e.g., "y2023").
-        log_option (str): The logging option ("print" or "write") for the test summary.
+        log_option (str): The logging option ("print" or "write") for the tests summary.
         debug (bool): If True, enable debug mode for additional information.
     """
 
@@ -37,13 +37,13 @@ class Tester(unittest.TestCase):
 
         Args:
             year (int): The year for which the tests are being run (e.g., 2023).
-            log_option (str): The logging option ("print" or "write") for the test summary.
+            log_option (str): The logging option ("print" or "write") for the tests summary.
             debug (bool): If True, enable debug mode for additional information.
-            runtime_limit (int): The maximum runtime limit (in seconds) for each test case execution.
+            runtime_limit (int): The maximum runtime limit (in seconds) for each tests case execution.
 
         Note:
-            The `runtime_limit` parameter defines the maximum time a test case execution is allowed to take.
-            If a test case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
+            The `runtime_limit` parameter defines the maximum time a tests case execution is allowed to take.
+            If a tests case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
         """
         super().__init__()
         self.year: str = f'y{year}'
@@ -59,11 +59,11 @@ class Tester(unittest.TestCase):
             show_table: bool = False,
     ) -> None:
         """
-        Run tests for the specified function using generated test cases.
+        Run tests for the specified function using generated tests cases.
 
         Args:
             user_func (Callable): The user-defined function to be tested.
-            num_test_cases (int): The number of test cases to generate and run.
+            num_test_cases (int): The number of tests cases to generate and run.
             show_table (bool): Whether to show the table of failed cases.
             more_detail (bool):
 
@@ -73,10 +73,10 @@ class Tester(unittest.TestCase):
             TimeoutError: If the function execution exceeds the timeout.
 
         Note:
-            This method generates test cases, compares function outputs, and calculates success rate.
+            This method generates tests cases, compares function outputs, and calculates success rate.
             Test results can be printed or written to a file based on provided options.
 
-            If a test case execution takes more than the specified runtime_limit (in seconds),
+            If a tests case execution takes more than the specified runtime_limit (in seconds),
             the function will raise a TimeoutError and terminate.
 
         Example:
@@ -100,12 +100,12 @@ class Tester(unittest.TestCase):
                 raise ValueError(f"Mismatched return type expected: {solver_return}, got: {return_type}")
 
             if not 1 <= num_test_cases <= 1_000_000:
-                logging.warning(f"Invalid number of test cases: {num_test_cases}")
-                raise ValueError("The number of test cases should be between 1 and 1,000,000.")
+                logging.warning(f"Invalid number of tests cases: {num_test_cases}")
+                raise ValueError("The number of tests cases should be between 1 and 1,000,000.")
 
             test_cases_params = getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
 
-            # Use multiprocessing to run the test with a timeout
+            # Use multiprocessing to run the tests with a timeout
             result_queue = Queue()
             process = Process(
                 target=self._run_test_case,
@@ -224,25 +224,25 @@ class Tester(unittest.TestCase):
 
     def _run_test_case(self: "Tester", **kwargs: Iterable) -> None:
         """
-        Run test cases and compare function outputs.
+        Run tests cases and compare function outputs.
 
         Args:
             **kwargs (Dict): Keyword arguments containing the necessary parameters for running the tests:
 
             :param user_func: Callable, the user-defined function to be tested.
             :param solver: Callable, the solution function to be tested against.
-            :param test_cases_params: Iterable, the parameters for the test cases.
-            :param num_test_cases: int, the number of test cases to generate and run.
+            :param test_cases_params: Iterable, the parameters for the tests cases.
+            :param num_test_cases: int, the number of tests cases to generate and run.
             :param return_type: str, the return type of the functions being tested.
-            :param result_queue: Queue, the queue to store the test results.
+            :param result_queue: Queue, the queue to store the tests results.
             :param show_table: bool, whether to show the table of failed cases.
 
         Returns:
             None
 
         Note:
-            This method runs test cases using the provided user_func and solver.
-            It compares the outputs of these functions, tracks failures, and calculates test results.
+            This method runs tests cases using the provided user_func and solver.
+            It compares the outputs of these functions, tracks failures, and calculates tests results.
 
         Raises:
             TimeoutError: If the function execution exceeds the timeout.
@@ -264,7 +264,7 @@ class Tester(unittest.TestCase):
         failed_count = 0
         failed_cases = []
 
-        for params in tqdm(test_cases_params, desc="Running test cases", unit="test"):
+        for params in tqdm(test_cases_params, desc="Running tests cases", unit="tests"):
             try:
                 user_output = self.__caller(user_func, return_type, *params)
                 solver_output = self.__caller(solver, return_type, *params)
@@ -374,7 +374,7 @@ class Tester(unittest.TestCase):
             self: "Tester", formatted_summary_data: str
     ) -> None:
         """
-        Handle the logging option for the test summary.
+        Handle the logging option for the tests summary.
 
         Args:
             formatted_summary_data (str): The formatted summary data.

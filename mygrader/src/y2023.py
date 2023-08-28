@@ -54,10 +54,10 @@ class Generator:
     @classmethod
     def find_intersection_test_cases(cls, num_test_cases: int) -> List:
         """
-        Generate a list of test cases with random parameters.
+        Generate a list of tests cases with random parameters.
 
         Args:
-            num_test_cases (int): Number of test cases to generate.
+            num_test_cases (int): Number of tests cases to generate.
         """
         test_cases = []
         for _ in range(num_test_cases):
@@ -129,13 +129,13 @@ class Generator:
         """
         Returns a string representation of the Generator class.
         """
-        return "Generator test cases for the year 2023"
+        return "Generator tests cases for the year 2023"
 
     def __str__(self) -> str:
         """
         Returns a string representation of the Generator class.
         """
-        return "Generator test cases for the year 2023"
+        return "Generator tests cases for the year 2023"
 
     def __getattr__(self, item):
         """

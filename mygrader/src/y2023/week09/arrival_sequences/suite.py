@@ -6,7 +6,7 @@ from tabulate import tabulate
 from template import MARKDOWN_FILENAME, MARKDOWN_TEMPLATE_FILE
 
 
-# Measure the time and run a test function
+# Measure the time and run a tests function
 def run_test(func, left_lane, right_lane):
     start_time = time.perf_counter()
     expected = func(left_lane, right_lane)

@@ -27,7 +27,7 @@ class TestMedalAllocation(unittest.TestCase):
                          "Three or more gold medalists should have no silver or bronze medalists")
 
     def test_custom_cases(self):
-        # Additional test cases
+        # Additional tests cases
         result = medal_allocation([9, 8, 7, 6, 5, 4, 3, 2])
         self.assertEqual(result, ([9], [8], [7]), "Case [9, 8, 7, 6, 5, 4, 3, 2] should be handled correctly")
 

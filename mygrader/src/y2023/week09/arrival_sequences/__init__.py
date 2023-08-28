@@ -21,7 +21,7 @@ def run_tests_and_get_summary(_test_suite_module, _num_test_cases, _output_optio
 
 
 if __name__ == '__main__':
-    test_suite_module = __import__('test')
+    test_suite_module = __import__('tests')
     num_test_cases = 1000
 
     run_tests_and_get_summary(test_suite_module, num_test_cases, _output_option='None')

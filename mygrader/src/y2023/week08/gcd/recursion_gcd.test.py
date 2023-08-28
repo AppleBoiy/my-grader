@@ -18,11 +18,11 @@ class TestGCDFunction(unittest.TestCase):
             except AssertionError as e:
                 failed_cases.append((x, y, e))
             if (i + 1) % 100_000 == 0:
-                print(f'{i + 1} test cases passed.')
+                print(f'{i + 1} tests cases passed.')
 
         num_failures = len(failed_cases)
         if num_failures > 0:
-            print(f"\nNumber of test cases failed: {num_failures}")
+            print(f"\nNumber of tests cases failed: {num_failures}")
             with open("failed_cases.txt", "w") as file:
                 print("\nTest cases that failed:")
                 for i, case in enumerate(failed_cases):
@@ -32,11 +32,10 @@ class TestGCDFunction(unittest.TestCase):
                         break
                     file.write(f"gcd({x}, {y}) -> Expected: {gcd(x, y)}, Actual: {recursion_gcd_v2.gcd(x, y)}\n")
         else:
-            print("All test cases passed successfully.")
+            print("All tests cases passed successfully.")
             # Remove the output file if it exists
             if os.path.exists("failed_cases.txt"):
                 os.remove("failed_cases.txt")
-
 
 
 if __name__ == '__main__':

@@ -100,13 +100,12 @@ class TestNumberToWords(unittest.TestCase):
         for i in range(100000):
             num = random.randint(0, 999_999_999_999)
 
-            # Convert the number using the function under test
+            # Convert the number using the function under tests
             converted = ""
             try:
                 converted = num_to_word(num)
             except IndexError as err:
                 ...
-
 
             # Generate the expected word representation
             expected = (
@@ -118,7 +117,6 @@ class TestNumberToWords(unittest.TestCase):
                 .replace('thous', 'thousand ')
                 .strip()
             )
-
 
             # Check if reversed_num matches the expected_reversed_num
             if converted != expected:
@@ -133,7 +131,6 @@ class TestNumberToWords(unittest.TestCase):
                 print(f"{num_passed} test cases processed.")
 
         print_test_results(num_passed, num_failed, failed_cases)
-
 
 
 if __name__ == '__main__':

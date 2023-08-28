@@ -38,7 +38,7 @@ class TestReverseDigits(unittest.TestCase):
             if (i + 1) % 100000 == 0:
                 print(f"P: {i + 1:_} out of {num_test_cases:_} test cases passed.")
 
-        # Print overall test results
+        # Print overall tests results
         print_test_results(num_passed, num_failed, failed_cases, True)
 
 

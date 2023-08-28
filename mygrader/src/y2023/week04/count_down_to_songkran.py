@@ -54,7 +54,7 @@ def test():
     assert count_down_to_songkran(1, 2, 2016) == 72
     assert count_down_to_songkran(13, 4, 2016) == 0
 
-    print("All test cases passed successfully.")
+    print("All tests cases passed successfully.")
 
 
 if __name__ == '__main__':

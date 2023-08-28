@@ -37,7 +37,7 @@ def is_overlapped(l1, t1, w1, h1, l2, t2, w2, h2):
 
 
 def test():
-    print("All test cases passed successfully.")
+    print("All tests cases passed successfully.")
 
 
 if __name__ == '__main__':

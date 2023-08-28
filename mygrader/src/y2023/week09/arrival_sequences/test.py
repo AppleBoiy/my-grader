@@ -24,7 +24,7 @@ class TestArrivalSequences(unittest.TestCase):
         red_lane = [f'L{i}' for i in range(1, 5)]
         orange_lane = [f'R{i}' for i in range(1, 5)]
 
-        with tqdm(total=num_test_cases, unit='test') as pbar:
+        with tqdm(total=num_test_cases, unit='tests') as pbar:
             for _ in range(num_test_cases):
                 left_lane_length = random.randint(1, 5)
                 right_lane_length = random.randint(1, 5)

@@ -19,7 +19,7 @@ If you're currently on the `candidate` branch and want to switch to a stable ver
 
 2. **Select a Stable Release**
 
-   From the list of releases, choose the stable version you want to switch to. Stable versions are typically tagged with names like `stable0.43`.
+   From the list of releases, choose the stable version you want to switch to. Stable versions are typically tagged with names like `v0.44`.
 
 ## Table of Contents
 

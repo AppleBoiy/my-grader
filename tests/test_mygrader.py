@@ -3,8 +3,8 @@ import io
 
 import pytest
 
-import mocker
 from mygrader import Tester
+from tests import MockClass
 
 
 class TestMyGrader:
@@ -28,7 +28,7 @@ class TestMyGrader:
         tester = Tester(2023, debug=True)
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
-            tester.run_test(mocker.calculate_sum)
+            tester.run_test(MockClass.calculate_sum)
         assert buffer.getvalue() != ""
 
     def test_run_test_with_runtime_limit(self):
@@ -36,20 +36,20 @@ class TestMyGrader:
 
         with pytest.raises(TimeoutError):
             with contextlib.redirect_stderr(io.StringIO()):
-                tester.run_test(mocker.calculate_sum, num_test_cases=1000)
+                tester.run_test(MockClass.calculate_sum, num_test_cases=1000)
 
     def test_run_test_with_memory_limit(self):
         tester = Tester(2023, debug=True)
 
         with pytest.raises(MemoryError):
             with contextlib.redirect_stderr(io.StringIO()):
-                tester.run_test(mocker.calculate_sum, num_test_cases=100000000)
+                tester.run_test(MockClass.calculate_sum, num_test_cases=100000000)
 
     def test_run_test_mismatched_data_type(self):
         tester = Tester(2023, debug=True)
         with pytest.raises(TypeError):
             with contextlib.redirect_stderr(io.StringIO()):
-                tester.run_test(mocker.display_time, num_test_cases="100000000")
+                tester.run_test(MockClass.display_time, num_test_cases="100000000")
 
 
 if __name__ == '__main__':

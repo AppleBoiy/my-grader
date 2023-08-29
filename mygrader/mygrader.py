@@ -11,7 +11,6 @@ from multiprocessing import Process, Queue
 from typing import Callable, Dict, Iterable, Any
 
 from tabulate import tabulate
-from timeout_decorator import timeout
 from tqdm import tqdm
 
 from mygrader import src, template
@@ -51,7 +50,6 @@ class Tester(unittest.TestCase):
         self.more_detail: bool = more_detail
         self.show_table: bool = show_table
 
-    @timeout(10)  # Timeout after 10 seconds to avoid infinite loops or long running functions
     def run_test(self, user_func: Callable, num_test_cases: int = 100) -> None:
         """
         Run tests for the specified function using generated test cases.

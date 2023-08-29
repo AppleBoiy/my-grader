@@ -245,9 +245,8 @@ class Solution(Helper):
         """
         Returns the k-th digit of the given number.
         """
-        num_str = str(number)
-        kth_digit_index = len(num_str) - k - 1
-        return int(num_str[kth_digit_index])
+        value = abs(number) // 10 ** k
+        return value % 10
 
     @classmethod
     def nearest_odd(cls, x: float) -> int:

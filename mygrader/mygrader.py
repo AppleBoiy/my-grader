@@ -43,7 +43,7 @@ class Tester(unittest.TestCase):
 
         Note:
             The `runtime_limit` parameter defines the maximum time a tests case execution is allowed to take.
-            If a tests case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
+            If a test case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
         """
         super().__init__()
         self.year: str = f'y{year}'
@@ -73,10 +73,10 @@ class Tester(unittest.TestCase):
             TimeoutError: If the function execution exceeds the timeout.
 
         Note:
-            This method generates tests cases, compares function outputs, and calculates success rate.
+            This method generates test cases, compares function outputs, and calculates success rate.
             Test results can be printed or written to a file based on provided options.
 
-            If a tests case execution takes more than the specified runtime_limit (in seconds),
+            If a test case execution takes more than the specified runtime_limit (in seconds),
             the function will raise a TimeoutError and terminate.
 
         Example:
@@ -97,11 +97,11 @@ class Tester(unittest.TestCase):
             solver_return = self.return_type(solver)
 
             if return_type != solver_return:
-                raise ValueError(f"Mismatched return type expected: {solver_return}, got: {return_type}")
+                raise TypeError(f"Mismatched return type expected: {solver_return}, got: {return_type}")
 
             if not 1 <= num_test_cases <= 1_000_000:
                 logging.warning(f"Invalid number of tests cases: {num_test_cases}")
-                raise ValueError("The number of tests cases should be between 1 and 1,000,000.")
+                raise MemoryError("Number of tests cases must be between 1 and 1,000,000")
 
             test_cases_params = getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
 
@@ -137,6 +137,12 @@ class Tester(unittest.TestCase):
 
         except ValueError as e:
             raise ValueError(f"Invalid option: {e}") from e
+
+        except TypeError as e:
+            raise TypeError(f"Invalid return type: {e}") from e
+
+        except MemoryError as e:
+            raise MemoryError(f"Invalid number of tests cases: {num_test_cases}") from e
 
     @classmethod
     def return_type(cls, func: Callable) -> str:

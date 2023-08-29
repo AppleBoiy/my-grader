@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='mygrader',
-    version='0.43',
+    version='0.44',
     packages=find_packages(),
 
     # Add any required dependencies here

@@ -43,7 +43,7 @@ class Tester(unittest.TestCase):
 
         Note:
             The `runtime_limit` parameter defines the maximum time a tests case execution is allowed to take.
-            If a tests case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
+            If a test case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
         """
         super().__init__()
         self.year: str = f'y{year}'
@@ -73,10 +73,10 @@ class Tester(unittest.TestCase):
             TimeoutError: If the function execution exceeds the timeout.
 
         Note:
-            This method generates tests cases, compares function outputs, and calculates success rate.
+            This method generates test cases, compares function outputs, and calculates success rate.
             Test results can be printed or written to a file based on provided options.
 
-            If a tests case execution takes more than the specified runtime_limit (in seconds),
+            If a test case execution takes more than the specified runtime_limit (in seconds),
             the function will raise a TimeoutError and terminate.
 
         Example:

@@ -48,7 +48,7 @@ class TestMyGrader:
         tester = Tester(2023, runtime_limit=0.01, debug=True)
         with pytest.raises(TimeoutError):
             with contextlib.redirect_stderr(io.StringIO()):
-                tester.run_test(MockClass.calculate_sum, num_test_cases=1_000_000)
+                tester.run_test(MockClass.nearest_odd, num_test_cases=1_000_000)
 
     # Test running a test that exceeds the memory limit
     def test_run_test_with_memory_limit(self):

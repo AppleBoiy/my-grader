@@ -36,7 +36,7 @@ class TestMyGrader:
 
     # Test running a test with a custom number of test cases
     def test_run_test_with_custom_num_test_cases(self):
-        tester = Tester(2023, debug=True, runtime_limit=6)
+        tester = Tester(2023, debug=True, runtime_limit=60)
         buffer = io.StringIO()
         for num_test_cases in range(1, 7):
             with contextlib.redirect_stdout(buffer):

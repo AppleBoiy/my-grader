@@ -1,11 +1,12 @@
 import contextlib
 import inspect
 import io
-import logging
 import os
 import sys
 import time
 import unittest
+from copy import deepcopy
+from math import isclose
 from multiprocessing import Process, Queue
 from typing import Callable, Dict, Iterable, Any
 
@@ -30,7 +31,9 @@ class Tester(unittest.TestCase):
             year: int,
             log_option: str = 'print',
             debug: bool = False,
-            runtime_limit: int = 1
+            runtime_limit: int = 1,
+            more_detail: bool = False,
+            show_table: bool = False
     ) -> None:
         """
         Initialize the Tester class.
@@ -50,22 +53,12 @@ class Tester(unittest.TestCase):
         self.log_option: str = log_option
         self.debug: bool = debug
         self.runtime_limit: int = runtime_limit
+        self.more_detail: bool = more_detail
+        self.show_table: bool = show_table
 
-    def run_test(
-            self,
-            user_func: Callable,
-            num_test_cases: int = 100,
-            more_detail: bool = False,
-            show_table: bool = False,
-    ) -> None:
+    def run_test(self, user_func: Callable, num_test_cases: int = 100) -> None:
         """
-        Run tests for the specified function using generated tests cases.
-
-        Args:
-            user_func (Callable): The user-defined function to be tested.
-            num_test_cases (int): The number of tests cases to generate and run.
-            show_table (bool): Whether to show the table of failed cases.
-            more_detail (bool):
+        Run tests for the specified function using generated test cases.
 
         Raises:
             ValueError: If an invalid option is provided.
@@ -88,22 +81,26 @@ class Tester(unittest.TestCase):
             >>> tester.run_test(add, num_test_cases=50)
         """
 
-        func_name = user_func.__name__
-
         try:
             test_module = getattr(src, self.year)
-            solver = getattr(test_module.Solution, func_name)
+            solver = getattr(test_module.Solution, user_func.__name__)
             return_type = self.return_type(user_func)
             solver_return = self.return_type(solver)
 
-            if return_type != solver_return:
-                raise TypeError(f"Mismatched return type expected: {solver_return}, got: {return_type}")
+            if return_type["type"] != solver_return["type"]:
+                raise TypeError(
+                    f"Mismatched return type expected: {solver_return['type']}, got: {return_type['type']}")
 
-            if not 1 <= num_test_cases <= 1_000_000:
-                logging.warning(f"Invalid number of tests cases: {num_test_cases}")
-                raise MemoryError("Number of tests cases must be between 1 and 1,000,000")
+            if return_type["is_dest"] != solver_return["is_dest"]:
+                expected_property = "destructive" if solver_return["is_dest"] else "non-destructive"
+                raise ValueError(f"This function should be {expected_property}, but your function is not.")
 
-            test_cases_params = getattr(test_module.Generator, f"{func_name}_test_cases")(num_test_cases)
+            if num_test_cases > 1_000_000:
+                raise MemoryError("Too many test cases. Please reduce the number of test cases.")
+            if num_test_cases < 1:
+                raise ValueError("Invalid number of test cases. Please provide a positive integer.")
+
+            test_cases_params = getattr(test_module.Generator, f"{user_func.__name__}_test_cases")(num_test_cases)
 
             # Use multiprocessing to run the tests with a timeout
             result_queue = Queue()
@@ -115,9 +112,7 @@ class Tester(unittest.TestCase):
                     "test_cases_params": test_cases_params,
                     "num_test_cases": num_test_cases,
                     "return_type": return_type,
-                    "result_queue": result_queue,
-                    "show_table": show_table,
-                    "more_detail": more_detail
+                    "result_queue": result_queue
                 }
             )
 
@@ -127,10 +122,13 @@ class Tester(unittest.TestCase):
             if process.is_alive():
                 process.terminate()
                 process.join()
-                raise TimeoutError(f"Function {func_name} timed out after {self.runtime_limit} seconds.")
+                raise TimeoutError(f"Function {user_func.__name__} timed out after {self.runtime_limit} seconds.")
 
             formatted_summary_data = result_queue.get()
             self.__handle_log_option(formatted_summary_data)
+
+        except TimeoutError as e:
+            raise TimeoutError(f"Function {user_func.__name__} timed out after {self.runtime_limit} seconds.") from e
 
         except AttributeError as e:
             raise AttributeError(f"Invalid function name: {user_func.__name__}") from e
@@ -142,43 +140,55 @@ class Tester(unittest.TestCase):
             raise TypeError(f"Invalid return type: {e}") from e
 
         except MemoryError as e:
-            raise MemoryError(f"Invalid number of tests cases: {num_test_cases}") from e
+            raise MemoryError(f"Invalid number of test cases: {num_test_cases}") from e
 
     @classmethod
-    def return_type(cls, func: Callable) -> str:
+    def return_type(cls, func: Callable) -> Dict[str, bool]:
         """
-        Get the return type of the given function.
+        Obtain the return type and determine if the function is destructive.
 
-        This method takes a callable function as input and returns a string representation
-        of its return type based on its signature's return annotation.
+        This method accepts a callable function as input and provides a dictionary
+        with information about its return type and whether the function is destructive.
 
         Args:
             func (Callable): The function to be analyzed.
 
         Returns:
-            str: The return type of the given function.
+            Dict[str, bool]: A dictionary with 'type' (str) and 'is_dest' (bool).
 
         Example:
             >>> def add(a: int, b: int) -> int:
             ...     return a + b
             ...
             >>> Tester.return_type(add)
-            'int'
+            {'type': 'int', 'is_dest': False}
         """
         original_stdout = sys.stdout
         sys.stdout = open(os.devnull, 'w')  # Redirect stdout to null device
-        _type = None
+
+        result = {
+            'type': None,
+            'is_dest': False
+        }
 
         try:
             signature = inspect.signature(func)
             return_annotation = signature.return_annotation
 
-            if return_annotation is inspect.Signature.empty:
-                generator = getattr(src.Generator, f"{func.__name__}_test_cases")
-                sample = generator(1)
-                return_annotation = type(func(*sample[0]))
+            generator_method = getattr(src.Generator, f"{func.__name__}_test_cases")
+            test_case = generator_method(1)
+            original_test_case = deepcopy(test_case)
 
-            _type = 'None' if str(return_annotation) == "<class 'NoneType'>" else str(return_annotation)
+            if return_annotation is inspect.Signature.empty:
+                return_annotation = type(func(*test_case[0]))
+
+            if str(return_annotation) == "<class 'NoneType'>":
+                result['type'] = 'None'
+            else:
+                result['type'] = str(return_annotation)
+
+            if test_case != original_test_case:
+                result['is_dest'] = True
 
         except AttributeError:
             raise AttributeError(f"Function not found in the Generator class: {func.__name__}")
@@ -186,7 +196,7 @@ class Tester(unittest.TestCase):
         finally:
             sys.stdout = original_stdout  # Restore original stdout
 
-        return _type
+        return result
 
     @classmethod
     def capture_printed_text(
@@ -262,7 +272,6 @@ class Tester(unittest.TestCase):
         num_test_cases: int = kwargs["num_test_cases"]
         return_type: str = kwargs["return_type"]
         result_queue: Queue = kwargs["result_queue"]
-        show_table: bool = kwargs["show_table"]
 
         start_time = time.time()
 
@@ -275,7 +284,9 @@ class Tester(unittest.TestCase):
                 user_output = self.__caller(user_func, return_type, *params)
                 solver_output = self.__caller(solver, return_type, *params)
 
-                if user_output == solver_output:
+                if isinstance(user_output, float) and isclose(user_output, solver_output, rel_tol=1e-09):
+                    passed_count += 1
+                elif user_output == solver_output:
                     passed_count += 1
                 else:
                     failed_count += 1
@@ -313,20 +324,16 @@ class Tester(unittest.TestCase):
             "average_time": total_time / num_test_cases,
             "test_per_second": num_test_cases / total_time
 
-        }, kwargs["more_detail"], show_table)
+        })
 
         result_queue.put(summary)
 
-    @staticmethod
-    def __generate_summary(
-            summary_data: Dict, more_detail: bool = False, show_table: bool = False
-    ) -> str:
+    def __generate_summary(self, summary_data: Dict) -> str:
         """
         Generate a summary based on the provided summary data and template.
 
         Args:
             summary_data (Dict): Dictionary containing summary data.
-            show_table (bool): Whether to show the table of failed cases.
 
         Returns:
             str: The formatted summary.
@@ -343,26 +350,26 @@ class Tester(unittest.TestCase):
         try:
             headers = ["Input", "Expected Output", "Actual Output"]
             table = []
-            if show_table:
+            if self.show_table:
                 for case in summary_data["failed_cases"][0:3]:
                     table.append([case["input"], f'{case["expected"]}'[:10], case["result"]][:10])
             else:
                 table = [["", "", ""]]
 
-            failed_cases_table = tabulate(table, headers=headers, tablefmt="grid") if show_table else ""
+            failed_cases_table = tabulate(table, headers=headers, tablefmt="grid") if self.show_table else ""
 
             additional_failed_cases_info = ""
-            if show_table and len(summary_data["failed_cases"]) > 3:
+            if self.show_table and len(summary_data["failed_cases"]) > 3:
                 additional_failed_cases_info = f"\nand more...{len(summary_data['failed_cases']) - 3} cases failed"
 
             summary_kwargs = {
                 key: value for key, value in summary_data.items() if key != "failed_cases"
             }
 
-            if more_detail:
+            if self.more_detail:
                 summary = template.more_info.format(
                     failed_cases_table=failed_cases_table,
-                    more_info="Table is disabled" if not show_table else additional_failed_cases_info,
+                    more_info="Table is disabled" if not self.show_table else additional_failed_cases_info,
                     **summary_kwargs
                 )
             else:
@@ -421,60 +428,3 @@ class Tester(unittest.TestCase):
             return captured_output["printed_text"]
 
         return captured_output["result"]
-
-    def __dir__(self) -> Iterable[str]:
-        """
-        Return the list of available functions for the given year.
-
-        Returns:
-            Iterable[str]: List of available functions.
-
-        Note:
-            This method inspects the module corresponding to the given year and retrieves a list of function names.
-            Function names starting with "__" are excluded from the list.
-
-        Example:
-            >>> tester = Tester(2023)
-
-            >>> available_functions = tester.__dir__()
-            >>> print(available_functions)
-        """
-        return [func for func in dir(getattr(src, self.year)) if not func.startswith("__")]
-
-    def __repr__(self) -> str:
-        """
-        Return a string representation of available functions for the given year.
-
-        Returns:
-            str: A formatted string listing available functions.
-
-        Note:
-            This method generates a string containing information about the available functions for the specified year.
-            It retrieves the list of available functions using the __dir__ method.
-
-        Example:
-            >>> tester = Tester(2023)
-            >>> representation = repr(tester)
-            >>> print(representation)
-            Available functions for 2023: ['function1', 'function2', ...]
-        """
-        return f"Available functions for {self.year}: {self.__dir__()}"
-
-    def __str__(self) -> str:
-        """
-        Return a string representation of the Tester class for the given year.
-
-        Returns:
-            str: A formatted string describing the Tester class.
-
-        Note:
-            This method generates a string containing information about the Tester class, including the year for which
-            the tests are being conducted. Additional information can be added as needed.
-
-        Example:
-            >>> tester = Tester(2023)
-            >>> description = str(tester)
-            >>> print(description)
-            Tester class for the year 2023
-        """
-        return f"Tester class for the year {self.year}"

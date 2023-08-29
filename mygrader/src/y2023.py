@@ -1,10 +1,22 @@
 import math
-import random
+from random import randint, uniform, choices
+from string import punctuation, ascii_letters
 from typing import List
 
 
 class Helper:
-    ...
+
+    @classmethod
+    def queue_bus(cls, result, prefix, seq1, seq2) -> None:
+        if not seq2 and not seq1:
+            # Joining the prefix to form a complete sequence
+            result.append('>'.join(prefix))
+
+        if seq1:
+            cls.queue_bus(result, prefix + [seq1[0]], seq1[1:], seq2)
+
+        if seq2:
+            cls.queue_bus(result, prefix + [seq2[0]], seq1, seq2[1:])
 
 
 class Generator:
@@ -13,8 +25,8 @@ class Generator:
     def calculate_sum_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            x = random.randint(1, 10 ** 9)  # Generate random x value
-            y = random.randint(x, 10 ** 9)  # Generate random y value
+            x = randint(1, 10 ** 9)  # Generate random x value
+            y = randint(x, 10 ** 9)  # Generate random y value
             test_cases.append((x, y))
         return test_cases
 
@@ -22,7 +34,7 @@ class Generator:
     def calculate_new_price_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            old_price = random.uniform(0.0, 1000.0)  # Generate random old price between 0 and 1000
+            old_price = uniform(0.0, 1000.0)  # Generate random old price between 0 and 1000
             test_cases.append((old_price,))
         return test_cases
 
@@ -30,14 +42,14 @@ class Generator:
     def calculate_triangle_area_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         while len(test_cases) < num_test_cases:
-            a = random.uniform(1.0, 100.0)
-            b = random.uniform(1.0, 100.0)
+            a = uniform(1.0, 100.0)
+            b = uniform(1.0, 100.0)
 
             # Ensure that the sum of a and b is greater than c
             c_min = abs(a - b) + 0.0001  # Add a small epsilon to avoid floating point precision issues
             c_max = a + b - 0.0001  # Subtract a small epsilon to avoid floating point precision issues
 
-            c = random.uniform(c_min, c_max)
+            c = uniform(c_min, c_max)
             test_cases.append((a, b, c))
 
         return test_cases
@@ -46,7 +58,7 @@ class Generator:
     def display_time_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            test_cases.append((random.randint(1, 10 ** 20),))
+            test_cases.append((randint(1, 10 ** 20),))
 
         return test_cases
 
@@ -60,10 +72,10 @@ class Generator:
         """
         test_cases = []
         for _ in range(num_test_cases):
-            m1 = random.uniform(0.0, 1000.0)
-            b1 = random.uniform(0.0, 1000.0)
-            m2 = random.uniform(0.0, 1000.0)
-            b2 = random.uniform(0.0, 1000.0)
+            m1 = uniform(0.0, 1000.0)
+            b1 = uniform(0.0, 1000.0)
+            m2 = uniform(0.0, 1000.0)
+            b2 = uniform(0.0, 1000.0)
             test_cases.append((m1, b1, m2, b2))
         return test_cases
 
@@ -71,7 +83,7 @@ class Generator:
     def find_r_from_surface_area_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            surface_area = random.uniform(0.0, 1000.0)
+            surface_area = uniform(0.0, 1000.0)
             test_cases.append((surface_area,))
         return test_cases
 
@@ -79,7 +91,7 @@ class Generator:
     def sphere_volume_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            radius = random.uniform(0.0, 1000.0)
+            radius = uniform(0.0, 1000.0)
             test_cases.append((radius,))
         return test_cases
 
@@ -87,8 +99,8 @@ class Generator:
     def kth_digit_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            number = random.randint(0, 10 ** 9)
-            k = random.randint(0, 9)
+            number = randint(0, 10 ** 9)
+            k = randint(0, 9)
             test_cases.append((number, k))
         return test_cases
 
@@ -96,7 +108,7 @@ class Generator:
     def nearest_odd_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            x = random.uniform(0.0, 1000.0)
+            x = uniform(0.0, 1000.0)
             test_cases.append((x,))
         return test_cases
 
@@ -104,7 +116,7 @@ class Generator:
     def octagon_area_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            side_length = random.uniform(0.0, 1000.0)
+            side_length = uniform(0.0, 1000.0)
             test_cases.append((side_length,))
         return test_cases
 
@@ -112,10 +124,53 @@ class Generator:
     def set_kth_digit_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            number = random.randint(0, 10 ** 9)
-            k = random.randint(0, 9)
-            value = random.randint(0, 9)
+            number = randint(0, 10 ** 9)
+            k = randint(0, 9)
+            value = randint(0, 9)
             test_cases.append((number, k, value))
+        return test_cases
+
+    @classmethod
+    def median_of_median_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            list_a = [uniform(0.0, 1000.0) for _ in range(randint(1, 100))]
+            test_cases.append((list_a,))
+        return test_cases
+
+    @classmethod
+    def patterned_message_test_cases(cls, num_test_cases: int) -> None:
+
+        test_cases = []
+        for _ in range(num_test_cases):
+            message = ''.join(choices(punctuation + ascii_letters, k=randint(1, 10)))
+            pattern = ''.join(choices(['*', ' '], k=randint(1, 100)))
+            test_cases.append((message, pattern))
+        return test_cases
+
+    @classmethod
+    def life_path_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            n = randint(1, 10 ** 9)
+            test_cases.append((n,))
+        return test_cases
+
+    @classmethod
+    def left_max_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            list_a = [uniform(0.0, 1000.0) for _ in range(randint(1, 100))]
+            test_cases.append((list_a,))
+        return test_cases
+
+    @classmethod
+    def arrival_sequences_test_cases(cls, num_test_cases: int) -> List:
+        test_cases = []
+        for _ in range(num_test_cases):
+            left_lane = tuple(choices(['R', 'O'], k=randint(1, 100)))
+            right_lane = tuple(choices(['R', 'O'], k=randint(1, 100)))
+            test_cases.append((left_lane, right_lane))
         return test_cases
 
 
@@ -273,4 +328,78 @@ class Solution(Helper):
         kth = cls.kth_digit(number, k) * coeff
         new_kth = value * coeff
         result = number - kth + new_kth
+        return result
+
+    @classmethod
+    def median_of_median(cls, list_a: list) -> float:
+        # Base cases
+        if len(list_a) == 1:
+            return list_a[0]
+
+        if len(list_a) == 2:
+            return sum(list_a) / 2
+
+        # Calculate sublist size
+        sub_size = len(list_a) // 3
+
+        # Divide the list into sublist
+        sub1 = list_a[:sub_size]
+        sub2 = list_a[sub_size:2 * sub_size]
+        sub3 = list_a[2 * sub_size:]
+
+        # Recursively find medians of sublist
+        med1 = cls.median_of_median(sub1)
+        med2 = cls.median_of_median(sub2)
+        med3 = cls.median_of_median(sub3)
+
+        # Calculate median of medians
+        med_of_meds_lst = [med1, med2, med3]
+
+        # Calculate final median
+        return sorted(med_of_meds_lst)[1]
+
+    @classmethod
+    def patterned_message(cls, message: str, pattern: str) -> None:
+        if not pattern:
+            return
+
+        message = message.replace(' ', '')
+
+        char: str = pattern[0]
+        tailer = pattern[1:]
+
+        if char == '*':
+            print(message[0], end='')
+            message = message[1:] + message[0]
+        else:
+            print(char, end='')
+
+        cls.patterned_message(message, tailer)
+
+    @classmethod
+    def life_path(cls, n: int) -> int:
+        while n >= 10:
+            n = n // 10 + n % 10
+        return n
+
+    @classmethod
+    def left_max(cls, list_a: list) -> list:
+        result = []
+        it = iter(list_a)
+        max_value = float('-inf')
+
+        while True:
+            try:
+                value = next(it)
+                max_value = max(max_value, value)
+                result.append(max_value)
+            except StopIteration:
+                break
+
+        return result
+
+    @classmethod
+    def arrival_sequences(cls, left_lane: tuple, right_lane: tuple) -> list:
+        result = []
+        cls.queue_bus(result, [], left_lane, right_lane)
         return result

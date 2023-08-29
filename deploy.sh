@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rm -r dist/*
+rm -rf dist/*
 
 python setup.py sdist
 twine upload dist/*

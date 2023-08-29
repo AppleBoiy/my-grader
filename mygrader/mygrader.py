@@ -11,20 +11,13 @@ from multiprocessing import Process, Queue
 from typing import Callable, Dict, Iterable, Any
 
 from tabulate import tabulate
+from timeout_decorator import timeout
 from tqdm import tqdm
 
 from mygrader import src, template
 
 
 class Tester(unittest.TestCase):
-    """
-    A tests class to run tests on user-defined functions.
-
-    Attributes:
-        year (str): The year for which the tests are being run (e.g., "y2023").
-        log_option (str): The logging option ("print" or "write") for the tests summary.
-        debug (bool): If True, enable debug mode for additional information.
-    """
 
     def __init__(
             self,
@@ -39,14 +32,16 @@ class Tester(unittest.TestCase):
         Initialize the Tester class.
 
         Args:
-            year (int): The year for which the tests are being run (e.g., 2023).
-            log_option (str): The logging option ("print" or "write") for the tests summary.
-            debug (bool): If True, enable debug mode for additional information.
-            runtime_limit (int): The maximum runtime limit (in seconds) for each tests case execution.
+           year (int): The year for which the tests are being run (e.g., 2023).
+           log_option (str): The logging option ("print" or "write") for the tests summary.
+           debug (bool): If True, enable debug mode for additional information.
+           runtime_limit (int): The maximum runtime limit (in seconds) for each test case execution.
+           more_detail (bool): If True, provide more detailed information in the summary.
+           show_table (bool): If True, show the table of failed cases in the summary.
 
         Note:
-            The `runtime_limit` parameter defines the maximum time a tests case execution is allowed to take.
-            If a test case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
+           The `runtime_limit` parameter defines the maximum time a tests case execution is allowed to take.
+           If a test case execution exceeds this limit, it will be terminated and considered as a TimeoutError.
         """
         super().__init__()
         self.year: str = f'y{year}'
@@ -56,9 +51,14 @@ class Tester(unittest.TestCase):
         self.more_detail: bool = more_detail
         self.show_table: bool = show_table
 
+    @timeout(10)  # Timeout after 10 seconds to avoid infinite loops or long running functions
     def run_test(self, user_func: Callable, num_test_cases: int = 100) -> None:
         """
         Run tests for the specified function using generated test cases.
+
+        Args:
+            user_func (Callable): The user-defined function to be tested.
+            num_test_cases (int): The number of test cases to generate and run.
 
         Raises:
             ValueError: If an invalid option is provided.
@@ -82,15 +82,22 @@ class Tester(unittest.TestCase):
         """
 
         try:
+            # Get the test module corresponding to the specified year
             test_module = getattr(src, self.year)
+
+            # Get the solver function corresponding to the user function
             solver = getattr(test_module.Solution, user_func.__name__)
+
+            # Get return type information for both the user and solver functions
             return_type = self.return_type(user_func)
             solver_return = self.return_type(solver)
 
+            # Check for mismatched return types
             if return_type["type"] != solver_return["type"]:
                 raise TypeError(
                     f"Mismatched return type expected: {solver_return['type']}, got: {return_type['type']}")
 
+            # Check if the function is destructive/non-destructive as expected
             if return_type["is_dest"] != solver_return["is_dest"]:
                 expected_property = "destructive" if solver_return["is_dest"] else "non-destructive"
                 raise ValueError(f"This function should be {expected_property}, but your function is not.")
@@ -100,6 +107,7 @@ class Tester(unittest.TestCase):
             if num_test_cases < 1:
                 raise ValueError("Invalid number of test cases. Please provide a positive integer.")
 
+            # Generate test case parameters using the Generator class
             test_cases_params = getattr(test_module.Generator, f"{user_func.__name__}_test_cases")(num_test_cases)
 
             # Use multiprocessing to run the tests with a timeout
@@ -227,7 +235,6 @@ class Tester(unittest.TestCase):
 
         # Use the redirect_stdout context manager to capture printed output
         with contextlib.redirect_stdout(buffer):
-            # Call the function with the provided arguments and keyword arguments
             result = func(*args)
 
         # Get the captured printed text
@@ -245,32 +252,29 @@ class Tester(unittest.TestCase):
         Args:
             **kwargs (Dict): Keyword arguments containing the necessary parameters for running the tests:
 
-            :param user_func: Callable, the user-defined function to be tested.
-            :param solver: Callable, the solution function to be tested against.
-            :param test_cases_params: Iterable, the parameters for the tests cases.
-            :param num_test_cases: int, the number of tests cases to generate and run.
-            :param return_type: str, the return type of the functions being tested.
-            :param result_queue: Queue, the queue to store the tests results.
-            :param show_table: bool, whether to show the table of failed cases.
-
         Returns:
             None
 
         Note:
-            This method runs tests cases using the provided user_func and solver.
-            It compares the outputs of these functions, tracks failures, and calculates tests results.
+            This method runs test cases using the provided user_func and solver.
+            It compares the outputs of these functions, tracks failures, and calculates test results.
 
         Raises:
             TimeoutError: If the function execution exceeds the timeout.
             Exception: If an error occurs while generating the summary.
         """
 
-        # Extract keyword arguments for better readability
+        # the user-defined function to be tested.
         user_func: Callable = kwargs["user_func"]
+        # the solution function to be tested against.
         solver: Callable = kwargs["solver"]
+        # the parameters for the test cases.
         test_cases_params: Iterable = kwargs["test_cases_params"]
+        # the number of test cases to generate and run.
         num_test_cases: int = kwargs["num_test_cases"]
+        # the return type of the functions being tested.
         return_type: str = kwargs["return_type"]
+        # the queue to store the tests results.
         result_queue: Queue = kwargs["result_queue"]
 
         start_time = time.time()
@@ -279,10 +283,13 @@ class Tester(unittest.TestCase):
         failed_count = 0
         failed_cases = []
 
-        for params in tqdm(test_cases_params, desc="Running tests cases", unit="tests", disable=self.debug):
+        for params in tqdm(test_cases_params, desc="Running test cases", unit="tests", disable=self.debug):
             try:
-                user_output = self.__caller(user_func, return_type, *params)
-                solver_output = self.__caller(solver, return_type, *params)
+                user_params = deepcopy(params)
+                solver_params = deepcopy(params)
+
+                user_output = self.__caller(user_func, return_type, *user_params)
+                solver_output = self.__caller(solver, return_type, *solver_params)
 
                 if isinstance(user_output, float) and isclose(user_output, solver_output, rel_tol=1e-09):
                     passed_count += 1
@@ -315,6 +322,7 @@ class Tester(unittest.TestCase):
         end_time = time.time()
         total_time = end_time - start_time
 
+        # Generate and format the summary based on the test results
         summary = self.__generate_summary({
             "passed_count": passed_count,
             "failed_count": failed_count,
@@ -323,7 +331,6 @@ class Tester(unittest.TestCase):
             "total_time_result": total_time,
             "average_time": total_time / num_test_cases,
             "test_per_second": num_test_cases / total_time
-
         })
 
         result_queue.put(summary)
@@ -350,14 +357,19 @@ class Tester(unittest.TestCase):
         try:
             headers = ["Input", "Expected Output", "Actual Output"]
             table = []
+
             if self.show_table:
+                # If show_table is enabled, populate the table with data from failed cases (up to 3 cases)
                 for case in summary_data["failed_cases"][0:3]:
                     table.append([case["input"], f'{case["expected"]}'[:10], case["result"]][:10])
             else:
+                # If show_table is disabled, display an empty row
                 table = [["", "", ""]]
 
+            # Generate the table format using tabulate (grid format)
             failed_cases_table = tabulate(table, headers=headers, tablefmt="grid") if self.show_table else ""
 
+            # Additional info about more failed cases if applicable
             additional_failed_cases_info = ""
             if self.show_table and len(summary_data["failed_cases"]) > 3:
                 additional_failed_cases_info = f"\nand more...{len(summary_data['failed_cases']) - 3} cases failed"
@@ -366,6 +378,7 @@ class Tester(unittest.TestCase):
                 key: value for key, value in summary_data.items() if key != "failed_cases"
             }
 
+            # Generate the summary using the appropriate template based on a more_detail option
             if self.more_detail:
                 summary = template.more_info.format(
                     failed_cases_table=failed_cases_table,
@@ -374,7 +387,6 @@ class Tester(unittest.TestCase):
                 )
             else:
                 summary = template.simple.format(**summary_kwargs)
-
 
         except FileNotFoundError as e:
             print(f"Error: {e}")

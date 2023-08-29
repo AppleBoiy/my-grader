@@ -164,9 +164,9 @@ class Generator:
     def arrival_sequences_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            left_lane = tuple(choices(['R', 'O'], k=randint(1, 100)))
-            right_lane = tuple(choices(['R', 'O'], k=randint(1, 100)))
-            test_cases.append((left_lane, right_lane))
+            group1 = [f'R{i}' for i in range(randint(1, 4))]
+            group2 = [f'L{i}' for i in range(randint(1, 4))]
+            test_cases.append((group1, group2))
         return test_cases
 
 

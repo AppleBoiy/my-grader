@@ -1,22 +1,19 @@
 from mygrader import Tester
 
 
-def median_of_median(list_a):
-    if len(list_a) == 1:
-        return list_a[0]
-    elif len(list_a) == 2:
-        return (list_a[0] + list_a[1]) / 2
+def patterned_message(message, pattern):
+    message = message.replace(' ', '')
+    if pattern == '':
+        return
 
-    pos3 = len(list_a) // 3
-
-    group = [median_of_median(list_a[:pos3]),
-             median_of_median(list_a[pos3:2 * pos3]),
-             median_of_median(list_a[2 * pos3:])]
-
-    middle = sum(group) - max(group) - min(group)
-
-    return middle
+    if pattern[0] == '*':
+        print(message[0], end='')
+        patterned_message(message[1:] + message[0], pattern[1:])
+    else:
+        print(pattern[0], end='')
+        patterned_message(message, pattern[1:])
 
 
 if __name__ == '__main__':
-    tester = Tester(2023, median_of_median, runtime_limit=3)
+    tester = Tester(2023, runtime_limit=10, show_table=True, debug=True, more_detail=True)
+    tester.run_test(patterned_message, num_test_cases=1)

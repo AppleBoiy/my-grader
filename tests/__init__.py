@@ -10,7 +10,7 @@ class MockClass:
         return summation
 
     @staticmethod
-    def display_time(ms: int) -> int:
+    def display_time(ms: int) -> tuple:
         """
             Mock test function to test the Tester class
 

@@ -131,15 +131,7 @@ class Generator:
         return test_cases
 
     @classmethod
-    def median_of_median_test_cases(cls, num_test_cases: int) -> List:
-        test_cases = []
-        for _ in range(num_test_cases):
-            list_a = [uniform(0.0, 1000.0) for _ in range(randint(1, 100))]
-            test_cases.append((list_a,))
-        return test_cases
-
-    @classmethod
-    def patterned_message_test_cases(cls, num_test_cases: int) -> None:
+    def patterned_message_test_cases(cls, num_test_cases: int) -> list:
 
         test_cases = []
         for _ in range(num_test_cases):
@@ -157,12 +149,16 @@ class Generator:
         return test_cases
 
     @classmethod
-    def left_max_test_cases(cls, num_test_cases: int) -> List:
+    def median_of_median_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
             list_a = [uniform(0.0, 1000.0) for _ in range(randint(1, 100))]
             test_cases.append((list_a,))
         return test_cases
+
+    @classmethod
+    def left_max_test_cases(cls, num_test_cases: int) -> List:
+        return cls.median_of_median_test_cases(num_test_cases)
 
     @classmethod
     def arrival_sequences_test_cases(cls, num_test_cases: int) -> List:

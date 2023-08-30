@@ -289,7 +289,7 @@ class Tester(unittest.TestCase):
                 user_output = self.__caller(user_func, return_type, *user_params)
                 solver_output = self.__caller(solver, return_type, *solver_params)
 
-                if isinstance(user_output, float) and isclose(user_output, solver_output, rel_tol=1e-09):
+                if isinstance(user_output, float) and isclose(user_output, solver_output, rel_tol=1e-9):
                     passed_count += 1
                 elif user_output == solver_output:
                     passed_count += 1

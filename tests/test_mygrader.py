@@ -70,7 +70,3 @@ class TestMyGrader:
         with pytest.raises(AttributeError):
             with contextlib.redirect_stderr(io.StringIO()):
                 tester.run_test(print, num_test_cases="1")
-
-
-if __name__ == '__main__':
-    pytest.main()

@@ -1,4 +1,5 @@
 from typing import List, Tuple
+
 from tabulate import tabulate
 
 from .writer import write_failed_cases_to_csv

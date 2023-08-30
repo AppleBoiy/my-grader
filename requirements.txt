@@ -1,4 +1,5 @@
 mygrader
+twine
 numpy
 tabulate
 setuptools

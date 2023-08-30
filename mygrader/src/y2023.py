@@ -1,7 +1,9 @@
 import math
 from random import randint, uniform, choices
 from string import punctuation, ascii_letters
-from typing import List
+from typing import List, Iterable
+
+from faker import Faker
 
 
 class Helper:
@@ -17,6 +19,10 @@ class Helper:
 
         if seq2:
             cls.queue_bus(result, prefix + [seq2[0]], seq1, seq2[1:])
+
+    @classmethod
+    def increase_left(cls, _iter: Iterable, _max: int) -> Iterable:
+        return map(lambda item: str(item) if item >= _max else str(_max), _iter)
 
 
 class Generator:
@@ -164,10 +170,64 @@ class Generator:
     def arrival_sequences_test_cases(cls, num_test_cases: int) -> List:
         test_cases = []
         for _ in range(num_test_cases):
-            group1 = [f'R{i}' for i in range(randint(1, 4))]
-            group2 = [f'L{i}' for i in range(randint(1, 4))]
+            group1 = tuple(f'R{randint(0, 1000):03d}' for _ in range(randint(1, 10)))
+            group2 = tuple(f'L{randint(0, 1000):03d}' for _ in range(randint(1, 10)))
             test_cases.append((group1, group2))
         return test_cases
+
+    @classmethod
+    def base_b_test_cases(cls, num_test_cases: int) -> list:
+        test_cases = []
+        for _ in range(num_test_cases):
+            number = randint(0, 10 ** 9)
+            b = randint(2, 10)
+            test_cases.append((number, b))
+        return test_cases
+
+    @classmethod
+    def gcd_test_cases(cls, num_test_cases: int) -> list:
+        test_cases = []
+        for _ in range(num_test_cases):
+            a = randint(-10 ** 9, 10 ** 9)
+            b = randint(-10 ** 9, 10 ** 9)
+            test_cases.append((a, b))
+        return test_cases
+
+    @classmethod
+    def pi_test_cases(cls, num_test_cases: int) -> list:
+        return cls.corner_frame_test_cases(num_test_cases)
+
+    @classmethod
+    def reverse_digits_test_cases(cls, num_test_cases: int) -> list:
+        test_cases = []
+        for _ in range(num_test_cases):
+            number = randint(-10 ** 9, 10 ** 9)
+            test_cases.append((number,))
+        return test_cases
+
+    @classmethod
+    def is_anagram_test_cases(cls, num_test_cases: int) -> list:
+        test_cases = []
+        fake = Faker()
+
+        for i in range(num_test_cases):
+            word = fake.sentence(nb_words=2, variable_nb_words=True, ext_word_list=None)
+
+            if i % 2 == 1:
+                # Generate a random anagram by shuffling the characters of the word
+                anagram = ''.join(fake.random_choices(word, length=len(word)))
+                if i % 2 == 0:
+                    anagram += anagram[0]
+            else:
+                anagram = ''.join(choices(ascii_letters, k=randint(1, len(word))))
+
+            test_cases.append((word, anagram))
+        return test_cases
+
+    @classmethod
+    def corner_frame_test_cases(cls, num_test_cases: int) -> list:
+        _max_test = min(100, num_test_cases)
+        return [(i,) for i in range(_max_test + 1)]
 
 
 class Solution(Helper):
@@ -328,6 +388,7 @@ class Solution(Helper):
 
     @classmethod
     def median_of_median(cls, list_a: list) -> float:
+
         # Base cases
         if len(list_a) == 1:
             return list_a[0]
@@ -399,3 +460,63 @@ class Solution(Helper):
         result = []
         cls.queue_bus(result, [], left_lane, right_lane)
         return result
+
+    @classmethod
+    def base_b(cls, number: int, b: int) -> int:
+        if number < b:
+            return number
+
+        return cls.base_b(number // b, b) * 10 + number % b
+
+    @classmethod
+    def gcd(cls, a: int, b: int) -> int:
+        if b == 0:
+            return abs(a)
+
+        return cls.gcd(b, a % b)
+
+    @classmethod
+    def pi(cls, n):
+        """
+       Calculate an approximation of pi using the Leibniz formula.
+
+       Parameters:
+       n (int): The number of terms to consider in the Leibniz formula.
+
+       Returns:
+       float: An approximation of pi using the Leibniz formula.
+       """
+        terms = map(
+            lambda x: (-1 if x % 2 == 0 else 1) * (4 / (2 * x * (2 * x + 1) * (2 * x + 2))),
+            range(1, n + 1)
+        )
+        pi_approximation = 3 + sum(terms)
+        return pi_approximation
+
+    @classmethod
+    def reverse_digits(cls, number: int) -> int:
+        if number < 0:
+            return -cls.reverse_digits(-number)
+
+        return int(str(number)[::-1])
+
+    @classmethod
+    def is_anagram(cls, s1: str, s2: str) -> bool:
+        # Clean the input strings by removing non-alphabetic characters and converting to lowercase
+        s1_cleaned = filter(str.isalpha, s1.lower())
+        s2_cleaned = filter(str.isalpha, s2.lower())
+
+        return sorted(s1_cleaned) == sorted(s2_cleaned)
+
+    @classmethod
+    def corner_frame(cls, n: int) -> str:
+        nums = range(1, n + 1)
+
+        # Map each line of the corner frame using the increase_left function
+        lines = map(lambda x: cls.increase_left(nums, x), nums)
+
+        # Convert each line to a space-separated string
+        lines = map(lambda line: " ".join(line), lines)
+
+        # Join the lines with a newline character and return the result
+        return "\n".join(lines) + "\n"

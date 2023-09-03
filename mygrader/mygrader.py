@@ -1,6 +1,7 @@
 import contextlib
 import inspect
 import io
+import logging
 import os
 import sys
 import time
@@ -24,7 +25,6 @@ class Tester(unittest.TestCase):
             log_option: str = 'print',
             debug: bool = False,
             runtime_limit: int = 1,
-            more_detail: bool = False,
             show_table: bool = False
     ) -> None:
         """
@@ -35,7 +35,6 @@ class Tester(unittest.TestCase):
            log_option (str): The logging option ("print" or "write") for the tests summary.
            debug (bool): If True, enable debug mode for additional information.
            runtime_limit (int): The maximum runtime limit (in seconds) for each test case execution.
-           more_detail (bool): If True, provide more detailed information in the summary.
            show_table (bool): If True, show the table of failed cases in the summary.
 
         Note:
@@ -47,7 +46,6 @@ class Tester(unittest.TestCase):
         self.log_option: str = log_option
         self.debug: bool = debug
         self.runtime_limit: int = runtime_limit
-        self.more_detail: bool = more_detail
         self.show_table: bool = show_table
 
     def run_test(self, user_func: Callable, num_test_cases: int = 100) -> None:
@@ -79,74 +77,60 @@ class Tester(unittest.TestCase):
             >>> tester.run_test(add, num_test_cases=50)
         """
 
-        try:
-            # Get the test module corresponding to the specified year
-            test_module = getattr(src, self.year)
+        # Get the test module corresponding to the specified year
+        test_module = getattr(src, self.year)
 
-            # Get the solver function corresponding to the user function
-            solver = getattr(test_module.Solution, user_func.__name__)
+        # Get the solver function corresponding to the user function
+        solver = getattr(test_module.Solution, user_func.__name__)
 
-            # Get return type information for both the user and solver functions
-            return_type = self.return_type(user_func)
-            solver_return = self.return_type(solver)
+        # Get return type information for both the user and solver functions
+        return_type = self.return_type(user_func)
+        solver_return = self.return_type(solver)
 
-            # Check for mismatched return types
-            if return_type["type"] != solver_return["type"]:
-                raise TypeError(
-                    f"Mismatched return type expected: {solver_return['type']}, got: {return_type['type']}")
+        # Check for mismatched return types
+        if return_type["type"] != solver_return["type"]:
+            raise TypeError(
+                f"Mismatched return type expected: {solver_return['type']}, got: {return_type['type']}")
 
-            # Check if the function is destructive/non-destructive as expected
-            if return_type["is_dest"] != solver_return["is_dest"]:
-                expected_property = "destructive" if solver_return["is_dest"] else "non-destructive"
-                raise ValueError(f"This function should be {expected_property}, but your function is not.")
+        # Check if the function is destructive/non-destructive as expected
+        if return_type["is_dest"] != solver_return["is_dest"]:
+            expected_property = "destructive" if solver_return["is_dest"] else "non-destructive"
+            raise Exception(f"This function should be {expected_property}, but your function is not.")
 
-            if num_test_cases > 1_000_000:
-                raise MemoryError("Too many test cases. Please reduce the number of test cases.")
-            if num_test_cases < 1:
-                raise ValueError("Invalid number of test cases. Please provide a positive integer.")
+        if num_test_cases > 1_000_000:
+            raise MemoryError("Too many test cases. Please reduce the number of test cases.")
+        elif num_test_cases < 1:
+            raise ValueError("Invalid number of test cases. Please provide a positive integer.")
+        elif num_test_cases >= 100_000:
+            logging.warning("This may take a while...")
 
-            # Generate test case parameters using the Generator class
-            test_cases_params = getattr(test_module.Generator, f"{user_func.__name__}_test_cases")(num_test_cases)
+        # Generate test case parameters using the Generator class
+        test_cases_params = getattr(test_module.Generator, f"{user_func.__name__}_test_cases")(num_test_cases)
 
-            # Use multiprocessing to run the tests with a timeout
-            result_queue = Queue()
-            process = Process(
-                target=self._run_test_case,
-                kwargs={
-                    "user_func": user_func,
-                    "solver": solver,
-                    "test_cases_params": test_cases_params,
-                    "num_test_cases": num_test_cases,
-                    "return_type": return_type,
-                    "result_queue": result_queue
-                }
-            )
+        # Use multiprocessing to run the tests with a timeout
+        result_queue = Queue()
+        process = Process(
+            target=self._run_test_case,
+            kwargs={
+                "user_func": user_func,
+                "solver": solver,
+                "test_cases_params": test_cases_params,
+                "num_test_cases": num_test_cases,
+                "return_type": return_type,
+                "result_queue": result_queue
+            }
+        )
 
-            process.start()
-            process.join(timeout=self.runtime_limit)
+        process.start()
+        process.join(timeout=self.runtime_limit)
 
-            if process.is_alive():
-                process.terminate()
-                process.join()
-                raise TimeoutError(f"Function {user_func.__name__} timed out after {self.runtime_limit} seconds.")
+        if process.is_alive():
+            process.terminate()
+            process.join()
+            raise TimeoutError(f"Function {user_func.__name__} timed out after {self.runtime_limit} seconds.")
 
-            formatted_summary_data = result_queue.get()
-            self.__handle_log_option(formatted_summary_data)
-
-        except TimeoutError as e:
-            raise TimeoutError(f"Function {user_func.__name__} timed out after {self.runtime_limit} seconds.") from e
-
-        except AttributeError as e:
-            raise AttributeError(f"Invalid function name: {user_func.__name__}") from e
-
-        except ValueError as e:
-            raise ValueError(f"Invalid option: {e}") from e
-
-        except TypeError as e:
-            raise TypeError(f"Invalid return type: {e}") from e
-
-        except MemoryError as e:
-            raise MemoryError(f"Invalid number of test cases: {num_test_cases}") from e
+        formatted_summary_data = result_queue.get()
+        self.__handle_log_option(formatted_summary_data)
 
     @classmethod
     def return_type(cls, func: Callable) -> Dict[str, bool]:
@@ -183,6 +167,7 @@ class Tester(unittest.TestCase):
 
             generator_method = getattr(src.Generator, f"{func.__name__}_test_cases")
             test_case = generator_method(1)
+
             original_test_case = deepcopy(test_case)
 
             if return_annotation is inspect.Signature.empty:
@@ -310,12 +295,7 @@ class Tester(unittest.TestCase):
                 })
 
             except Exception as e:
-                failed_count += 1
-                failed_cases.append({
-                    "input": params,
-                    "expected": "Error",
-                    "result": f"Error: {e}"
-                })
+                raise Exception(f"Error occurred while running test cases: {e}")
 
         end_time = time.time()
         total_time = end_time - start_time
@@ -352,44 +332,38 @@ class Tester(unittest.TestCase):
             It fills in placeholders in the template with the relevant information from the summary data.
             The generated summary can include a table of failed cases if show_table is True.
         """
-        try:
-            headers = ["Input", "Expected Output", "Actual Output"]
-            table = []
+        headers = ["Input", "Expected Output", "Actual Output"]
+        table = []
 
-            if self.show_table:
-                # If show_table is enabled, populate the table with data from failed cases (up to 3 cases)
-                for case in summary_data["failed_cases"][0:3]:
-                    table.append([case["input"], f'{case["expected"]}'[:10], case["result"]][:10])
-            else:
-                # If show_table is disabled, display an empty row
-                table = [["", "", ""]]
+        if self.show_table:
+            # If show_table is enabled, populate the table with data from failed cases (up to 3 cases)
+            for case in summary_data["failed_cases"][0:3]:
+                table.append([case["input"], f'{case["expected"]}'[:10], case["result"]][:10])
+        else:
+            # If show_table is disabled, display an empty row
+            table = [["", "", ""]]
 
-            # Generate the table format using tabulate (grid format)
-            failed_cases_table = tabulate(table, headers=headers, tablefmt="grid") if self.show_table else ""
+        # Generate the table format using tabulate (grid format)
+        failed_cases_table = tabulate(table, headers=headers, tablefmt="grid") if self.show_table else ""
 
-            # Additional info about more failed cases if applicable
-            additional_failed_cases_info = ""
-            if self.show_table and len(summary_data["failed_cases"]) > 3:
-                additional_failed_cases_info = f"\nand more...{len(summary_data['failed_cases']) - 3} cases failed"
+        # Additional info about more failed cases if applicable
+        additional_failed_cases_info = ""
+        if self.show_table and len(summary_data["failed_cases"]) > 3:
+            additional_failed_cases_info = f"\nand more...{len(summary_data['failed_cases']) - 3} cases failed"
 
-            summary_kwargs = {
-                key: value for key, value in summary_data.items() if key != "failed_cases"
-            }
+        summary_kwargs = {
+            key: value for key, value in summary_data.items() if key != "failed_cases"
+        }
 
-            # Generate the summary using the appropriate template based on a more_detail option
-            if self.more_detail:
-                summary = template.more_info.format(
-                    failed_cases_table=failed_cases_table,
-                    more_info="Table is disabled" if not self.show_table else additional_failed_cases_info,
-                    **summary_kwargs
-                )
-            else:
-                summary = template.simple.format(**summary_kwargs)
-
-        except FileNotFoundError as e:
-            print(f"Error: {e}")
-            print(f"Error at line {e.__traceback__.tb_lineno}")
-            raise FileNotFoundError("Template file not found. Please make sure that the template file exists.") from e
+        # Generate the summary using the appropriate template based on a more_detail option
+        if self.show_table:
+            summary = template.more_info.format(
+                failed_cases_table=failed_cases_table,
+                more_info="Table is disabled" if not self.show_table else additional_failed_cases_info,
+                **summary_kwargs
+            )
+        else:
+            summary = template.simple.format(**summary_kwargs)
 
         return summary
 

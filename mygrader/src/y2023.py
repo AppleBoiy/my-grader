@@ -9,6 +9,11 @@ from faker import Faker
 class Helper:
 
     @classmethod
+    def generate_100range_max_cases(cls, num_test_cases: int) -> list:
+        _max_test = min(100, num_test_cases)
+        return [(i,) for i in range(_max_test + 1)]
+
+    @classmethod
     def queue_bus(cls, result, prefix, seq1, seq2) -> None:
         if not seq2 and not seq1:
             # Joining the prefix to form a complete sequence
@@ -24,8 +29,22 @@ class Helper:
     def increase_left(cls, _iter: Iterable, _max: int) -> Iterable:
         return map(lambda item: str(item) if item >= _max else str(_max), _iter)
 
+    @classmethod
+    def find_medal(cls, lst: List) -> tuple:
+        # Sort the list and remove zeros
+        lst = sorted(filter(lambda x: x != 0, lst))
+        gold = list(filter(lambda x: x == max(lst), lst))
 
-class Generator:
+        lst = sorted(filter(lambda x: x != max(lst), lst))
+        silver = list(filter(lambda x: x == max(lst), lst))
+
+        lst = sorted(filter(lambda x: x != max(lst), lst))
+        bronze = list(filter(lambda x: x == max(lst), lst))
+
+        return gold, silver, bronze
+
+
+class Generator(Helper):
 
     @classmethod
     def calculate_sum_test_cases(cls, num_test_cases: int) -> List:
@@ -156,8 +175,8 @@ class Generator:
 
     @classmethod
     def median_of_median_test_cases(cls, num_test_cases: int) -> List:
-        test_cases = []
-        for _ in range(num_test_cases):
+        test_cases = [([1.0, 2.0, 3.0],)]
+        for _ in range(num_test_cases - 1):
             list_a = [uniform(0.0, 1000.0) for _ in range(randint(1, 100))]
             test_cases.append((list_a,))
         return test_cases
@@ -195,7 +214,7 @@ class Generator:
 
     @classmethod
     def pi_test_cases(cls, num_test_cases: int) -> list:
-        return cls.corner_frame_test_cases(num_test_cases)
+        return cls.generate_100range_max_cases(num_test_cases)
 
     @classmethod
     def reverse_digits_test_cases(cls, num_test_cases: int) -> list:
@@ -226,8 +245,18 @@ class Generator:
 
     @classmethod
     def corner_frame_test_cases(cls, num_test_cases: int) -> list:
-        _max_test = min(100, num_test_cases)
-        return [(i,) for i in range(_max_test + 1)]
+        return cls.generate_100range_max_cases(num_test_cases)
+
+    @classmethod
+    def medal_allocation_test_cases(cls, num_test_cases: int) -> list:
+        test_cases = []
+        for _ in range(num_test_cases):
+            lst = [randint(-100, 100) for _ in range(randint(1, 100))]
+            lst.extend([lst[0]] * randint(0, 3))
+            lst.extend([lst[-1]] * randint(0, 3))
+            lst.extend([lst[int(len(lst) / 2)]] * randint(0, 3))
+            test_cases.append((lst,))
+        return test_cases
 
 
 class Solution(Helper):
@@ -413,7 +442,7 @@ class Solution(Helper):
         med_of_meds_lst = [med1, med2, med3]
 
         # Calculate final median
-        return sorted(med_of_meds_lst)[1]
+        return sum(med_of_meds_lst) - min(med_of_meds_lst) - max(med_of_meds_lst)
 
     @classmethod
     def patterned_message(cls, message: str, pattern: str) -> None:
@@ -520,3 +549,26 @@ class Solution(Helper):
 
         # Join the lines with a newline character and return the result
         return "\n".join(lines) + "\n"
+
+    @classmethod
+    def medal_allocation(cls, lst: List[int]) -> tuple:
+        # Find the medalists from the given list
+        gold, silver, bronze = cls.find_medal(lst)
+
+        # If there are no gold medalists, return empty lists for all medals
+        if not gold:
+            return [], [], []
+
+        if len(gold) == 1:
+            # Only one gold medalist
+            if len(silver) >= 2:
+                # More than one silver medalist, no bronze medalist
+                return gold, silver, []
+            # Only one silver medalist, return gold, silver, and bronze medalists
+            return gold, silver, bronze
+        elif len(gold) == 2:
+            # Two gold medalists, no silver medalist
+            return gold, [], silver
+        else:
+            # Three or more gold medalists, no silver or bronze medalist
+            return gold, [], []

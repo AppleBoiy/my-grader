@@ -2,36 +2,35 @@
 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AppleBoiy_my-grader&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AppleBoiy_my-grader) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AppleBoiy_my-grader&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AppleBoiy_my-grader)
 
-The **MyGrader** project is a custom testing framework designed to help you test your user-defined functions
-efficiently. It generates test cases, runs them against your functions, and provides detailed summaries of the test
-results. This can be particularly useful for students and developers working on programming assignments.
+## Announcement: Archiving MyGrader Repository in Version 0.45
 
-MyGrader is currently in the alpha development stage. It's actively being worked on and improved. Feel free to
-contribute and help make it even better!
+Dear MyGrader Community,
 
-## Switching to Stable Version
+We want to inform you that in the upcoming version 0.45 of MyGrader, we will be archiving this repository. This decision has been made to transition our efforts toward a new project named ["CMS"](https://github.com/AppleBoiy/cms) (Contest Management System). We believe that CMS will offer an even more robust and versatile platform for testing and grading user-defined functions efficiently.
 
-If you're currently on the `candidate` branch and want to switch to a stable version of MyGrader, you can follow these
-steps:
+### Why the Transition?
 
-1. **Browse the Releases**
+The decision to archive MyGrader in version 0.45 is driven by our commitment to providing the best tools and solutions for students and developers working on programming assignments. CMS represents a significant step forward in terms of features, flexibility, and scalability. We're excited about the possibilities it brings to the table.
 
-   Visit the [Releases](https://github.com/AppleBoiy/my-grader/releases) page on GitHub to find the list of available
-   releases.
+### What to Expect in Version 0.45?
 
-2. **Select a Stable Release**
+In MyGrader version 0.45, you can expect the following:
 
-   From the list of releases, choose the stable version you want to switch to. Stable versions are typically tagged with
-   names like `stable0.44`.
+- A final release with any pending bug fixes and improvements.
+- Clear instructions on transitioning to CMS, including data migration guides if applicable.
 
-## Table of Contents
+### Transitioning to CMS
 
-- [Usage](#usage)
-- [Installation](#installation)
-- [Attributes](#attributes)
-- [Methods](#methods)
-- [Contributing](#contributing)
-- [License](#license)
+We encourage all MyGrader users to make a smooth transition to CMS once it becomes available. CMS will offer an easy migration process to ensure that you can continue testing and grading your user-defined functions seamlessly.
+
+Stay tuned for updates on CMS and the official release announcement. We believe that CMS will be a valuable addition to your toolkit for testing and grading assignments.
+
+We sincerely appreciate your support and contributions to MyGrader over the years. Your feedback and engagement have been invaluable in shaping our tools for the better. If you have any questions or concerns regarding this transition, please feel free to reach out to us through the CMS repository.
+
+Thank you for being a part of the MyGrader community, and we look forward to serving you better with [CMS](https://github.com/AppleBoiy/cms).
+
+Best regards,
+**AppleBoiy**
 
 ## Usage
 
@@ -85,20 +84,6 @@ pip install mygrader
 - `runtime_limit`: The maximum runtime allowed for test cases (in seconds)
 - `log_option`: The logging option ("print" or "write") for the test summary.
 - `debug`: If `True`, enable debug mode for additional information.
-
-## Methods
-
-- `run_test(user_func, num_test_cases=100, show_table=False)`: Run tests for the specified user-defined function.
-- `return_type(func)`: Return the return type of a given function.
-- `capture_printed_text(func, *args)`: Capture the printed output of a function.
-- `__dir__()`: Return the list of available functions for the given year.
-- `__repr__()`: Return a string representation of available functions for the given year.
-- `__str__()`: Return a string representation of the Tester class for the given year.
-
-## Contributing
-
-Contributions to the MyGrader project are welcome! If you encounter issues or have ideas for improvements, please open
-an issue or submit a pull request on [GitHub](https://github.com/AppleBoiy/my-grader).
 
 ## License
 
